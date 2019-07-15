@@ -76,101 +76,56 @@ func (c *HttpClient) FetchToken(stage, username, password string) error {
 }
 
 func (c *HttpClient) Get(url string, out interface{}) (*HttpResponse, error) {
-	client := &http.Client{}
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to create GET request to endpoint: %s", url)
-	}
-
-	req.Header.Set("accept", "application/json")
-	req.Header.Set("authorization", c.token)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, errors.Wrapf(err, "GET request to endpoint: %s failed", url)
-	}
-
-	r, err := parseHttpResponse(resp)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to parse response from GET request to endpoint: %s", url)
-	}
-
-	if out != nil {
-		if err = json.Unmarshal(r.Body, out); err != nil {
-			return nil, errors.Wrapf(err, "Failed to unmarshal json response from GET request to endpoint: %s", url)
-		}
-	}
-
-	return r, err
+	return c.send("GET", url, nil, out)
 }
 
 func (c *HttpClient) Post(url string, in interface{}, out interface{}) (*HttpResponse, error) {
-	client := &http.Client{}
-
-	bs := new(bytes.Buffer)
-	if err := json.NewEncoder(bs).Encode(in); err != nil {
-		return nil, errors.Wrapf(err, "Failed marshal body for POST request to endpoint: %s", url)
-	}
-
-	req, err := http.NewRequest("POST", url, bs)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to create POST request to endpoint: %s", url)
-	}
-
-	req.Header.Set("accept", "application/json")
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("authorization", c.token)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, errors.Wrapf(err, "POST request to endpoint: %s failed", url)
-	}
-
-	r, err := parseHttpResponse(resp)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to parse response from POST request to endpoint: %s", url)
-	}
-
-	if out != nil {
-		if err = json.Unmarshal(r.Body, out); err == nil {
-			return nil, errors.Wrapf(err, "Failed to unmarshal json response from POST request to endpoint: %s", url)
-		}
-	}
-
-	return r, err
+	return c.send("POST", url, in, out)
 }
 
 func (c *HttpClient) Put(url string, in interface{}, out interface{}) (*HttpResponse, error) {
+	return c.send("PUT", url, in, out)
+}
+
+func (c *HttpClient) Delete(url string, out interface{}) (*HttpResponse, error) {
+	return c.send("DELETE", url, nil, out)
+}
+
+func (c *HttpClient) send(method, url string, in interface{}, out interface{}) (*HttpResponse, error) {
 	client := &http.Client{}
 
 	bs := new(bytes.Buffer)
-	if err := json.NewEncoder(bs).Encode(in); err != nil {
-		return nil, errors.Wrapf(err, "Failed marshal body for POST request to endpoint: %s", url)
+	if in != nil && (method == "POST" || method == "PUT") {
+		if err := json.NewEncoder(bs).Encode(in); err != nil {
+			return nil, errors.Wrapf(err, "Failed marshal body for %s request to endpoint: %s", method, url)
+		}
 	}
 
-	req, err := http.NewRequest("PUT", url, bs)
+	req, err := http.NewRequest(method, url, bs)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to create POST request to endpoint: %s", url)
+		return nil, errors.Wrapf(err, "Failed to create %s request to endpoint: %s", method, url)
 	}
 
 	req.Header.Set("accept", "application/json")
-	req.Header.Set("content-type", "application/json")
 	req.Header.Set("authorization", c.token)
+
+	if in != nil && (method == "POST" || method == "PUT") {
+		req.Header.Set("content-type", "application/json")
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, errors.Wrapf(err, "POST request to endpoint: %s failed", url)
+		return nil, errors.Wrapf(err, "%s request to endpoint: %s failed", method, url)
 	}
 
 	r, err := parseHttpResponse(resp)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Failed to parse response from POST request to endpoint: %s", url)
+		return nil, errors.Wrapf(err, "Failed to parse response from %s request to endpoint: %s", method, url)
 	}
 
 	if out != nil {
 		if err = json.Unmarshal(r.Body, out); err != nil {
-			return nil, errors.Wrapf(err, "Failed to unmarshal json response from POST request to endpoint: %s", url)
+			return nil, errors.Wrapf(err, "Failed to unmarshal json response from %s request to endpoint: %s", method, url)
 		}
 	}
 
