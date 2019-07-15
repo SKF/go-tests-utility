@@ -32,13 +32,6 @@ func NewWithToken(token string) *HttpClient {
 func (c *HttpClient) FetchToken(stage, username, password string) error {
 	client := &http.Client{}
 
-	var url string
-	if stage == "prod" {
-		url = "https://api-auth.users.enlight.skf.com/login"
-	} else {
-		url = fmt.Sprintf("https://api-auth.%s.users.enlight.skf.com/login", stage)
-	}
-
 	in := struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -47,6 +40,13 @@ func (c *HttpClient) FetchToken(stage, username, password string) error {
 	out := &struct {
 		Token string `json:"token"`
 	}{}
+
+	var url string
+	if stage == "prod" {
+		url = "https://api-auth.users.enlight.skf.com/login"
+	} else {
+		url = fmt.Sprintf("https://api-auth.%s.users.enlight.skf.com/login", stage)
+	}
 
 	bs := new(bytes.Buffer)
 	if err := json.NewEncoder(bs).Encode(in); err != nil {
@@ -68,11 +68,10 @@ func (c *HttpClient) FetchToken(stage, username, password string) error {
 
 	defer resp.Body.Close()
 	if err = json.NewDecoder(resp.Body).Decode(out); err != nil {
-		return errors.Wrapf(err, "Failed to unmarshal json response from GET request to endpoint: %s", url)
+		return errors.Wrapf(err, "Failed to unmarshal json response from POST request to endpoint: %s", url)
 	}
 
 	c.token = out.Token
-	fmt.Printf("Token: %+v\n", c.token)
 	return nil
 }
 
