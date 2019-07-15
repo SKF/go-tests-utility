@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -20,8 +21,59 @@ type HttpResponse struct {
 	Body       []byte
 }
 
-func New(token string) *HttpClient {
+func New() *HttpClient {
+	return &HttpClient{}
+}
+
+func NewWithToken(token string) *HttpClient {
 	return &HttpClient{token: token}
+}
+
+func (c *HttpClient) FetchToken(stage, username, password string) error {
+	client := &http.Client{}
+
+	var url string
+	if stage == "prod" {
+		url = "https://api-auth.users.enlight.skf.com/login"
+	} else {
+		url = fmt.Sprintf("https://api-auth.%s.users.enlight.skf.com/login", stage)
+	}
+
+	in := struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}{username, password}
+
+	out := &struct {
+		Token string `json:"token"`
+	}{}
+
+	bs := new(bytes.Buffer)
+	if err := json.NewEncoder(bs).Encode(in); err != nil {
+		return errors.Wrapf(err, "Failed marshal body for POST request to endpoint: %s", url)
+	}
+
+	req, err := http.NewRequest("POST", url, bs)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to create POST request to endpoint: %s", url)
+	}
+
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("content-type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return errors.Wrapf(err, "POST request to endpoint: %s failed", url)
+	}
+
+	defer resp.Body.Close()
+	if err = json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return errors.Wrapf(err, "Failed to unmarshal json response from GET request to endpoint: %s", url)
+	}
+
+	c.token = out.Token
+	fmt.Printf("Token: %+v\n", c.token)
+	return nil
 }
 
 func (c *HttpClient) Get(url string, out interface{}) (*HttpResponse, error) {
