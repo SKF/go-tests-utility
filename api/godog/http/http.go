@@ -95,7 +95,9 @@ func (c *HttpClient) send(method, url string, in interface{}, out interface{}) (
 	client := &http.Client{}
 
 	bs := new(bytes.Buffer)
-	if in != nil && (method == "POST" || method == "PUT") {
+	sendBody :=in != nil && (method == "POST" || method == "PUT") 
+
+	if sendBody{
 		if err := json.NewEncoder(bs).Encode(in); err != nil {
 			return nil, errors.Wrapf(err, "Failed marshal body for %s request to endpoint: %s", method, url)
 		}
@@ -108,8 +110,7 @@ func (c *HttpClient) send(method, url string, in interface{}, out interface{}) (
 
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("authorization", c.token)
-
-	if in != nil && (method == "POST" || method == "PUT") {
+	if sendBody {
 		req.Header.Set("content-type", "application/json")
 	}
 
