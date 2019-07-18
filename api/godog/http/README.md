@@ -20,19 +20,21 @@ Feature: It should be posible to create and retreive users from the service
 Backing code:
 ```
 import (
-    "github.com/SKF/go-test-utility"
+	"github.com/DATA-DOG/godog"
+	"github.com/pkg/errors"
+    "github.com/SKF/go-tests-utility/api/godog/json"
 )
 
 const (
     loginEmail = "aladdin@example.com"
     loginPassword = "simsalabim"
 )
-    
+
 type state struct {
     client       *http.HttpClient
 	requestURL    string
     requestBody   interface{}
-	httpResponse *utils.HttpResponse
+	httpResponse *http.HttpResponse
 	result        interface{}
 }
 
@@ -54,7 +56,7 @@ func (st *state) createUser(email, firstname, lastname string) error {
 }
 
 func (st *state) getUser(email string) error {
-    responseBody = struct {
+    responseBody := struct {
         user user
     }{}
 
@@ -100,11 +102,11 @@ func (st *state) httpHeaderMatch(header, pattern string) error {
     return errors.Errorf("No HTTP header value matched for %s (%+v)", header, h)
 }
 
-func main() {
+func FeatureContext(s *godog.Suite) {
     st := state{}
     st.client = http.New()
 
-    if err := st.client.FetchToken(loginEmail, loginPassword); err != nil {
+    if err := st.client.FetchToken("sandbox", loginEmail, loginPassword); err != nil {
         panic(err)
     }
 
@@ -113,4 +115,5 @@ func main() {
     s.Step(`^the returned status should be "([^"]+)"$`, st.httpStatusMatch)
     s.Step(`^the response header "([^"]+)" should match "([^"]+)"$`, st.httpHeaderMatch)
 }
+
 ```
