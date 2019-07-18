@@ -17,9 +17,9 @@ Feature: It should be posible to create and retreive users from the service
 Backing code:
 ```
 import (
-	"strings"
-	"github.com/DATA-DOG/godog"
-	"github.com/DATA-DOG/godog/gherkin"
+    "strings"
+    "github.com/DATA-DOG/godog"
+    "github.com/DATA-DOG/godog/gherkin"
     "github.com/SKF/go-tests-utility/api/godog/json"
 )
 
