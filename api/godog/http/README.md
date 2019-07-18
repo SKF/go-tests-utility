@@ -20,8 +20,8 @@ Feature: It should be posible to create and retreive users from the service
 Backing code:
 ```
 import (
-	"github.com/DATA-DOG/godog"
-	"github.com/pkg/errors"
+    "github.com/DATA-DOG/godog"
+    "github.com/pkg/errors"
     "github.com/SKF/go-tests-utility/api/godog/json"
 )
 
@@ -32,10 +32,10 @@ const (
 
 type state struct {
     client       *http.HttpClient
-	requestURL    string
+    requestURL    string
     requestBody   interface{}
-	httpResponse *http.HttpResponse
-	result        interface{}
+    httpResponse *http.HttpResponse
+    result        interface{}
 }
 
 type user struct {
@@ -47,11 +47,11 @@ type user struct {
 func (st *state) createUser(email, firstname, lastname string) error {
     st.requestURL = "https://localhost/users"
     st.requestBody = user{firstname, lastname, email} 
-	resp, err := st.client.Post(st.requestURL, st.requestBody, nil)
-	if err != nil {
-		return err
-	}
-	st.httpResponse = resp
+    resp, err := st.client.Post(st.requestURL, st.requestBody, nil)
+    if err != nil {
+        return err
+    }
+    st.httpResponse = resp
     return nil
 }
 
@@ -60,14 +60,14 @@ func (st *state) getUser(email string) error {
         user user
     }{}
 
-	resp, err := st.client.Get(st.requestURL, &responseBody)
-	if err != nil {
-		return err
-	}
+    resp, err := st.client.Get(st.requestURL, &responseBody)
+    if err != nil {
+        return err
+    }
 
-	st.httpResponse = resp
+    st.httpResponse = resp
     st.result = responseBody.user
-	return nil
+    return nil
 }
 
 
