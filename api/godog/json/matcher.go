@@ -128,7 +128,7 @@ func resolve(json []byte, path string) (term, error) {
 }
 
 func parseMatchSegments(path string) ([]segment, error) {
-	re := regexp.MustCompile(`([a-zA-Z0-9_]+)(\[(\d+)\])?`)
+	re := regexp.MustCompile(`([^["]+)(\[(\d+)\])?`)
 	matchPath := strings.Split(strings.Trim(path, "."), ".")
 
 	segments := make([]segment, 0)
