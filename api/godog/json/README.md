@@ -1,5 +1,5 @@
-# HTTP utilities for godog test suits
-A simple abstraction on top of the go http client.
+# JSON utilities for godog test suits
+Implements a matcher for JSON encoded structures.
 
 ## Usage Example:
 Feature:
@@ -17,15 +17,11 @@ Feature: It should be posible to create and retreive users from the service
 Backing code:
 ```
 import (
-	"github.com/DATA-DOG/godog/gherkin"
-    "github.com/SKF/go-tests-utility/api/godog/json"
-)
-
-import (
 	"fmt"
 	"strings"
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
+    "github.com/SKF/go-tests-utility/api/godog/json"
 )
 
 type state struct {
@@ -33,19 +29,18 @@ type state struct {
 }
 
 func (st *state) setJsonDump(input *gherkin.DocString) error {
-	fmt.Printf("DocString %+v", *input)
     st.dump = []byte(strings.TrimSpace(input.Content))
-	return nil
+    return nil
 }
 
 func (st *state) matchJson(key, pattern string) error {
-	return Match(st.dump, key, pattern)
+    return Match(st.dump, key, pattern)
 }
 
 func FeatureContext(s *godog.Suite) {
     st := state{}
-	s.Step(`^given the following json dump:$`, st.setJsonDump)
-	s.Step(`^the path "([^"]*)" should match "([^"]*)"$`, st.matchJson)
+    s.Step(`^given the following json dump:$`, st.setJsonDump)
+    s.Step(`^the path "([^"]*)" should match "([^"]*)"$`, st.matchJson)
 }
     
 ```
