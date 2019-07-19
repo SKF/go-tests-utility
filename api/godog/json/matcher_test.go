@@ -31,13 +31,13 @@ func TestMatcherNumbers(t *testing.T) {
 	require.Nil(t, Match(json, ".key", `12345`))
 
 	json = []byte(`{"key" : 123.456}`)
-	require.Nil(t, Match(json, ".key", `123\.456`))
+	require.Nil(t, Match(json, ".key", `\d{3}\.\d{3}`))
 
 	json = []byte(`{"key" : -12345}`)
 	require.Nil(t, Match(json, ".key", `-12345`))
 
 	json = []byte(`{"key" : -123.456}`)
-	require.Nil(t, Match(json, ".key", `-123\.456`))
+	require.Nil(t, Match(json, ".key", `-\d{3}\.\d{3}`))
 }
 
 func TestMatcherArray(t *testing.T) {
