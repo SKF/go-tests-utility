@@ -2,11 +2,11 @@ package http
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSmokeGet(t *testing.T) {
@@ -27,7 +27,7 @@ func TestSmokeGet(t *testing.T) {
 }
 
 func TestSmokePost(t *testing.T) {
-	realBody := struct{
+	realBody := struct {
 		Key string `json:"key"`
 	}{"this is the value"}
 
@@ -51,7 +51,7 @@ func TestSmokePost(t *testing.T) {
 }
 
 func TestSmokePut(t *testing.T) {
-	realBody := struct{
+	realBody := struct {
 		Key string `json:"key"`
 	}{"this is the value"}
 
