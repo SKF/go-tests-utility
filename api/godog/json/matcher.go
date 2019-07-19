@@ -153,6 +153,7 @@ func parseMatchSegments(path string) ([]segment, error) {
 func parse(json []byte) (term, error) {
 	var lex scanner.Scanner
 	lex.Init(bytes.NewReader(json))
+	lex.Mode = scanner.ScanIdents | scanner.ScanInts | scanner.ScanFloats | scanner.ScanStrings
 
 	t, err := parseTerm(&lex)
 	if err != nil {
@@ -173,6 +174,8 @@ func parseTerm(lex *scanner.Scanner) (term, error) {
 		return parseObject(lex)
 	case '[':
 		return parseArray(lex)
+	case '-':
+		return parseNegativeNumber(lex)
 	case scanner.Ident:
 		return encodeIdent(lex)
 	case scanner.String:
@@ -182,7 +185,7 @@ func parseTerm(lex *scanner.Scanner) (term, error) {
 	case scanner.EOF:
 		return null, errors.Errorf("Parse error: Unexpected EOF")
 	default:
-		return null, errors.Errorf("Parse error: Unexpected token: '%d'", lex.Peek())
+		return null, errors.Errorf("Parse error: Unexpected token: '%c'", lex.Peek())
 	}
 }
 
@@ -265,4 +268,13 @@ func parseArray(lex *scanner.Scanner) (term, error) {
 	lex.Scan() // Drop ']'
 
 	return term{jsonType: jsonArray, value: arr}, nil
+}
+
+func parseNegativeNumber(lex *scanner.Scanner) (term, error) {
+	tok := lex.Scan()
+	if tok == scanner.Int || tok == scanner.Float {
+		text := lex.TokenText()
+		return term{jsonType: jsonNumber, value: "-" + text}, nil
+	}
+	return null, errors.Errorf("Parse error: Expected a number got: '%s'", lex.TokenText())
 }
