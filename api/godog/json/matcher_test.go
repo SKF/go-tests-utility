@@ -26,6 +26,20 @@ func TestMatcherNestedMulti(t *testing.T) {
 	require.Nil(t, Match(json, ".keyA.keyC", "valueC"))
 }
 
+func TestMatcherNumbers(t *testing.T) {
+	json := []byte(`{"key" : 12345}`)
+	require.Nil(t, Match(json, ".key", `12345`))
+
+	json = []byte(`{"key" : 123.456}`)
+	require.Nil(t, Match(json, ".key", `\d{3}\.\d{3}`))
+
+	json = []byte(`{"key" : -12345}`)
+	require.Nil(t, Match(json, ".key", `-12345`))
+
+	json = []byte(`{"key" : -123.456}`)
+	require.Nil(t, Match(json, ".key", `-\d{3}\.\d{3}`))
+}
+
 func TestMatcherArray(t *testing.T) {
 	json := []byte(`{"keyA" : ["value1", "value2"]}`)
 	require.Nil(t, Match(json, ".keyA[1]", "value2"))
