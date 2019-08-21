@@ -161,8 +161,13 @@ func parse(json []byte) (term, error) {
 	}
 
 	_, ok := t.value.(map[string]term)
-	if !ok || lex.Peek() != scanner.EOF {
-		return null, errors.Errorf("Match error: Expected a single toplevel object JSON: %s", string(json))
+	if !ok {
+		return null, errors.Errorf("Match error: Expected a single toplevel object JSON: `%s`", string(json))
+	}
+
+	tok := lex.Scan()
+	if tok != scanner.EOF {
+		return null, errors.Errorf("Match error: Expected a single toplevel object JSON (%v): `%s`", tok, string(json))
 	}
 
 	return t, nil
