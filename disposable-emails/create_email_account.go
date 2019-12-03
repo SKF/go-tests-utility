@@ -104,8 +104,8 @@ func getAllMessages(emailAddress string, fromTimestamp time.Time) (messages []ma
 		if innerErr != nil {
 			continue
 		}
-
-		date, innerErr := time.Parse(time.RFC1123Z, msg.Header.Get("Date"))
+		const dateFormat = "Mon, 2 Jan 2006 15:04:05 -0700"
+		date, innerErr := time.Parse(dateFormat, msg.Header.Get("Date"))
 		if innerErr != nil {
 			continue
 		}
