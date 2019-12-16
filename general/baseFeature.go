@@ -15,11 +15,9 @@ type BaseFeature struct {
 	GetValue func(key string) (value string, err error)
 }
 
-func GetBaseFeature(baseUrl, deprecatedBaseURL string) BaseFeature {
-	return BaseFeature{
-		baseURL: baseUrl,
-		deprecatedBaseURL:deprecatedBaseURL,
-	}
+func (api *BaseFeature)Init(baseUrl, deprecatedBaseURL string) {
+		api.baseURL = baseUrl
+		api.deprecatedBaseURL = deprecatedBaseURL
 }
 
 type Request struct {
