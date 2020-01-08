@@ -1,4 +1,4 @@
-package general
+package godog
 
 import (
 	"bytes"
@@ -10,9 +10,10 @@ import (
 	"strings"
 	"time"
 
-	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
 	http_model "github.com/SKF/go-utility/http-model"
 	"github.com/pkg/errors"
+
+	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
 )
 
 func (api *BaseFeature) CreatePathRequest(method, path string) error {
@@ -114,7 +115,7 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 	return nil
 }
 
-func (api *BaseFeature) IsNotEmpty(responseKey string) error {
+func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
 	value, err := json_matcher.Read(api.Response.Body, responseKey)
 	if err != nil {
 		return err
@@ -126,7 +127,7 @@ func (api *BaseFeature) IsNotEmpty(responseKey string) error {
 	return nil
 }
 
-func (api *BaseFeature) TheResponseBodyValueEquals(key, expected string) (err error) {
+func (api *BaseFeature) AssertResponseBodyValueEquals(key, expected string) (err error) {
 	switch key {
 	case "len(.data)":
 		return api.AssertDataLength(expected)
@@ -157,7 +158,7 @@ func (api *BaseFeature) AssertDataLength(expected string) error {
 	return json_matcher.ArrayLen(api.Response.Body, ".data", expectedLen)
 }
 
-func (api *BaseFeature) TheResponseCodeShouldBe(code int) (err error) {
+func (api *BaseFeature) AssertResponseCode(code int) (err error) {
 	if api.Response.Raw.StatusCode != code {
 		err = errors.Errorf("wrong status code in Response: %d, Response: %s, Request: %+v", api.Response.Raw.StatusCode, string(api.Response.Body), api.Request)
 		return
@@ -167,16 +168,16 @@ func (api *BaseFeature) TheResponseCodeShouldBe(code int) (err error) {
 }
 
 func (api *BaseFeature) TheResponseErrorShouldBe(errorMessage string, code int) (err error) {
-	if err = api.TheResponseCodeShouldBe(code); err != nil {
+	if err = api.AssertResponseCode(code); err != nil {
 		return
 	}
-	if err = api.TheResponseErrorMessageShouldBe(errorMessage); err != nil {
+	if err = api.AssertResponseBodyErrorMessageIs(errorMessage); err != nil {
 		return
 	}
 	return
 }
 
-func (api *BaseFeature) TheResponseErrorMessageShouldBe(errorMessage string) (err error) {
+func (api *BaseFeature) AssertResponseBodyErrorMessageIs(errorMessage string) (err error) {
 	var responseBody http_model.ErrorResponse
 	if err = json.Unmarshal(api.Response.Body, &responseBody); err != nil {
 		return
