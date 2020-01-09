@@ -26,12 +26,6 @@ func (api *BaseFeature) CreatePathRequest(method, path string) error {
 	return nil
 }
 
-func (api *BaseFeature) TheUserCreatesADeprecatedPathRequest(method, path string) error {
-	api.CreatePathRequest(method, path) //nolint:errcheck
-	api.Request.Url = api.deprecatedBaseURL + path
-	return nil
-}
-
 func (api *BaseFeature) SetRequestHeaderParameterTo(key, value string) (err error) {
 	if strings.HasPrefix(value, ".") {
 		if value, err = api.GetValue(value); err != nil {
@@ -167,7 +161,7 @@ func (api *BaseFeature) AssertResponseCode(code int) (err error) {
 	return
 }
 
-func (api *BaseFeature) TheResponseErrorShouldBe(errorMessage string, code int) (err error) {
+func (api *BaseFeature) AssertErrorIs(errorMessage string, code int) (err error) {
 	if err = api.AssertResponseCode(code); err != nil {
 		return
 	}

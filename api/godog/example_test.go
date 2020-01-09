@@ -11,7 +11,7 @@ import (
 
 func TestGetRequest(t *testing.T) {
 	api := BaseFeature{}
-	api.Init("http://dummy.restapiexample.com/","")
+	api.SetBaseUrl("http://dummy.restapiexample.com/")
 
 	err := api.CreatePathRequest(http.MethodGet, "/api/v1/employee/{id}")
 	assert.NoError(t, err)
