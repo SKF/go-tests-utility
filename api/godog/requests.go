@@ -154,7 +154,7 @@ func (api *BaseFeature) AssertDataLength(expected string) error {
 
 func (api *BaseFeature) AssertResponseCode(code int) (err error) {
 	if api.Response.Raw.StatusCode != code {
-		err = errors.Errorf("wrong status code in Response: %d, Response: %s, Request: %+v", api.Response.Raw.StatusCode, string(api.Response.Body), api.Request)
+		err = errors.Errorf("expected status code: %d, got: %d \n response: %s, request: %+v", code, api.Response.Raw.StatusCode, string(api.Response.Body), api.Request)
 		return
 	}
 
@@ -177,7 +177,7 @@ func (api *BaseFeature) AssertResponseBodyErrorMessageIs(errorMessage string) (e
 		return
 	}
 	if responseBody.Error.Message != errorMessage {
-		err = errors.Errorf("wrong error message in Response: %s", responseBody.Error.Message)
+		err = errors.Errorf("expected error message: %s, got: %s" ,errorMessage, responseBody.Error.Message)
 		return
 	}
 	return
