@@ -1,7 +1,6 @@
 package godog
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -44,8 +43,6 @@ func TestCreateInvalidRequest(t *testing.T) {
 
 	err = api.ExecuteInvalidRequest()
 	require.NoError(t, err)
-
-	fmt.Printf("%s\n", api.Response.Body)
 
 	err = api.AssertResponseCode(http.StatusInternalServerError)
 	require.NoError(t, err)
