@@ -83,6 +83,10 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 		return errors.Wrap(err, "json.Marshal failed")
 	}
 
+	return api.executeTheRequest(jsonBody)
+}
+
+func (api *BaseFeature) executeTheRequest(jsonBody []byte) (err error) {
 	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return errors.Wrapf(err, "http.NewRequest failed - Body: `%s`", string(jsonBody))
@@ -107,6 +111,11 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 	api.Response.Body = jsonBody
 
 	return nil
+}
+
+func (api *BaseFeature) ExecuteInvalidRequest() error {
+	invalidBody := []byte(`{ "param": "value",}`)
+	return api.executeTheRequest(invalidBody)
 }
 
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
