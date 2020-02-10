@@ -24,6 +24,7 @@ type Request struct {
 	Headers       http.Header
 	Method        string
 	ExecutionTime time.Time
+
 }
 
 type response struct {
