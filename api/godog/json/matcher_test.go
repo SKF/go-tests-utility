@@ -12,11 +12,13 @@ func TestMatcherSmoke(t *testing.T) {
 }
 
 func TestMatcherNull(t *testing.T) {
+	require.Nil(t, MatchNull([]byte(` null  `), ""))
 	require.Nil(t, MatchNull([]byte(`null`), ""))
 	require.Nil(t, MatchNull([]byte(`null`), "."))
 	require.Nil(t, MatchNull([]byte(`{"key": null}`), ".key"))
 	require.Nil(t, MatchNull([]byte(`{"key": [null]}`), ".key[0]"))
 
+	require.NotNil(t, MatchNull([]byte(""), ""))
 	require.NotNil(t, MatchNull([]byte(`{"key": []}`), ".key"))
 	require.NotNil(t, MatchNull([]byte(`{"key": [null]}`), ".key"))
 	require.NotNil(t, MatchNull([]byte(`{"key": {}}`), ".key"))
