@@ -22,6 +22,7 @@ func TestMatcherNull(t *testing.T) {
 	require.NotNil(t, MatchNull([]byte(`{"key": []}`), ".key"))
 	require.NotNil(t, MatchNull([]byte(`{"key": [null]}`), ".key"))
 	require.NotNil(t, MatchNull([]byte(`{"key": {}}`), ".key"))
+	require.NotNil(t, MatchNull([]byte(`{"key": ""}`), ".key"))
 	require.NotNil(t, MatchNull([]byte(`{"key": "abc"}`), ".key"))
 	require.NotNil(t, MatchNull([]byte(`null`), ".key"))
 }
