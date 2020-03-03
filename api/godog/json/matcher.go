@@ -33,6 +33,10 @@ const (
 var null = term{jsonType: jsonNull, value: nil}
 
 func MatchNull(json []byte, path string) error {
+	if bytes.Equal(bytes.TrimSpace(json), []byte("null")) && (path == "" || path == ".") {
+		return nil
+	}
+
 	t, err := resolve(json, path)
 	if err != nil {
 		return err

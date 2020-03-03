@@ -12,6 +12,8 @@ func TestMatcherSmoke(t *testing.T) {
 }
 
 func TestMatcherNull(t *testing.T) {
+	require.Nil(t, MatchNull([]byte(`null`), ""))
+	require.Nil(t, MatchNull([]byte(`null`), "."))
 	require.Nil(t, MatchNull([]byte(`{"key": null}`), ".key"))
 	require.Nil(t, MatchNull([]byte(`{"key": [null]}`), ".key[0]"))
 
@@ -19,7 +21,7 @@ func TestMatcherNull(t *testing.T) {
 	require.NotNil(t, MatchNull([]byte(`{"key": [null]}`), ".key"))
 	require.NotNil(t, MatchNull([]byte(`{"key": {}}`), ".key"))
 	require.NotNil(t, MatchNull([]byte(`{"key": "abc"}`), ".key"))
-	require.NotNil(t, MatchNull([]byte(`null`), ".")) // doesn't support toplevel
+	require.NotNil(t, MatchNull([]byte(`null`), ".key"))
 }
 
 func TestMatcherNested(t *testing.T) {
