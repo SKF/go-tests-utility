@@ -32,7 +32,24 @@ const (
 
 var null = term{jsonType: jsonNull, value: nil}
 
-func Match(json []byte, path, pattern string) error {
+func MatchNull(json []byte, path string) error {
+	if bytes.Equal(bytes.TrimSpace(json), []byte("null")) && (path == "" || path == ".") {
+		return nil
+	}
+
+	t, err := resolve(json, path)
+	if err != nil {
+		return err
+	}
+
+	if t.value != nil {
+		return errors.Errorf("Match error: Expected null got '%T' JSON: %s", t.value, string(json))
+	}
+
+	return nil
+}
+
+func Match(json []byte, path string, pattern string) error {
 	re, err := regexp.Compile(pattern)
 	if err != nil {
 		return errors.Wrap(err, "Failed to compile regexp")
