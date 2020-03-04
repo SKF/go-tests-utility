@@ -6,16 +6,16 @@ import (
 )
 
 type BaseFeature struct {
-	StartedAt         time.Time
-	Response          response
-	Request           Request
-	baseURL           string
+	StartedAt time.Time
+	Response  response
+	Request   Request
+	baseURL   string
 
 	GetValue func(key string) (value string, err error)
 }
 
 func (api *BaseFeature) SetBaseUrl(baseUrl string) {
-		api.baseURL = baseUrl
+	api.baseURL = baseUrl
 }
 
 type Request struct {

@@ -83,10 +83,10 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 		return errors.Wrap(err, "json.Marshal failed")
 	}
 
-	return api.executeTheRequest(jsonBody)
+	return api.ExecuteTheRequestBytes(jsonBody)
 }
 
-func (api *BaseFeature) executeTheRequest(jsonBody []byte) (err error) {
+func (api *BaseFeature) ExecuteTheRequestBytes(jsonBody []byte) (err error) {
 	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return errors.Wrapf(err, "http.NewRequest failed - Body: `%s`", string(jsonBody))
@@ -115,7 +115,7 @@ func (api *BaseFeature) executeTheRequest(jsonBody []byte) (err error) {
 
 func (api *BaseFeature) ExecuteInvalidRequest() error {
 	invalidBody := []byte(`{ "param": "value",}`)
-	return api.executeTheRequest(invalidBody)
+	return api.ExecuteTheRequestBytes(invalidBody)
 }
 
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
@@ -186,7 +186,7 @@ func (api *BaseFeature) AssertResponseBodyErrorMessageIs(errorMessage string) (e
 		return
 	}
 	if responseBody.Error.Message != errorMessage {
-		err = errors.Errorf("expected error message: %s, got: %s" ,errorMessage, responseBody.Error.Message)
+		err = errors.Errorf("expected error message: %s, got: %s", errorMessage, responseBody.Error.Message)
 		return
 	}
 	return
