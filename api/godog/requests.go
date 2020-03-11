@@ -89,7 +89,7 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error) {
 	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bytes.NewBuffer(payload))
 	if err != nil {
-		return errors.Wrapf(err, "http.NewRequest failed - Body: `%s`", string(payload))
+		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
 
 	req.Header = api.Request.Headers
