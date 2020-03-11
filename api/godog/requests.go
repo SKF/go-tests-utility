@@ -83,13 +83,13 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 		return errors.Wrap(err, "json.Marshal failed")
 	}
 
-	return api.executeTheRequest(jsonBody)
+	return api.ExecuteTheRequestWithPayload(jsonBody)
 }
 
-func (api *BaseFeature) executeTheRequest(jsonBody []byte) (err error) {
-	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bytes.NewBuffer(jsonBody))
+func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error) {
+	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bytes.NewBuffer(payload))
 	if err != nil {
-		return errors.Wrapf(err, "http.NewRequest failed - Body: `%s`", string(jsonBody))
+		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
 
 	req.Header = api.Request.Headers
@@ -103,19 +103,20 @@ func (api *BaseFeature) executeTheRequest(jsonBody []byte) (err error) {
 	}
 
 	defer resp.Body.Close()
-	if jsonBody, err = ioutil.ReadAll(resp.Body); err != nil {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return errors.Wrap(err, "ioutil.ReadAll failed")
 	}
 
 	api.Response.Raw = resp
-	api.Response.Body = jsonBody
+	api.Response.Body = body
 
 	return nil
 }
 
 func (api *BaseFeature) ExecuteInvalidRequest() error {
 	invalidBody := []byte(`{ "param": "value",}`)
-	return api.executeTheRequest(invalidBody)
+	return api.ExecuteTheRequestWithPayload(invalidBody)
 }
 
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
@@ -186,7 +187,7 @@ func (api *BaseFeature) AssertResponseBodyErrorMessageIs(errorMessage string) (e
 		return
 	}
 	if responseBody.Error.Message != errorMessage {
-		err = errors.Errorf("expected error message: %s, got: %s" ,errorMessage, responseBody.Error.Message)
+		err = errors.Errorf("expected error message: %s, got: %s", errorMessage, responseBody.Error.Message)
 		return
 	}
 	return
