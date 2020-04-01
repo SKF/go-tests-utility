@@ -73,7 +73,7 @@ func Create(accessToken, stage, companyID, email string) (_ User, password strin
 		return
 	}
 
-	const subject = "Welcome to SKF Enlight Centre"
+	const subject = "Welcome to SKF Digital Services"
 	actualEmail, err := disposable_emails.PollForMessageWithSubject(email, subject, startedAt)
 	if err != nil {
 		return
