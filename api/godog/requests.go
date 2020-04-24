@@ -77,6 +77,36 @@ func (api *BaseFeature) SetRequestBodyParameterTo(key, value string) (err error)
 	return
 }
 
+func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr string) (err error) {
+	values := strings.Split(valuesstr, ",")
+	list := make([]string, len(values))
+	for i, value := range values {
+		value = strings.TrimSpace(value)
+		if strings.HasPrefix(value, ".") {
+			if value, err = api.GetValue(value); err != nil {
+				return err
+			}
+		}
+		list[i] = value
+	}
+
+	keyParts := strings.Split(key, ".")
+	prevMap := api.Request.Body
+	for idx, key := range keyParts {
+		if len(keyParts) == idx+1 {
+			prevMap[key] = list
+			break
+		}
+
+		if _, exists := prevMap[key]; !exists {
+			prevMap[key] = make(map[string]interface{})
+		}
+		prevMap = prevMap[key].(map[string]interface{})
+	}
+
+	return
+}
+
 func (api *BaseFeature) ExecuteTheRequest() (err error) {
 	jsonBody, err := json.Marshal(api.Request.Body)
 	if err != nil {
