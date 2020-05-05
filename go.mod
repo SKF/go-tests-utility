@@ -6,4 +6,5 @@ require (
 	github.com/SKF/go-utility v1.9.4
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.4.0
+	gopkg.in/go-playground/assert.v1 v1.2.1
 )
