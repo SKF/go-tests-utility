@@ -103,6 +103,28 @@ func Read(json []byte, path string) (result string, err error) {
 	return value, nil
 }
 
+func ReadStringArr(json []byte, path string) (result []string, err error) {
+	t, err := resolve(json, path)
+	if err != nil {
+		return []string{}, err
+	}
+
+	values, ok := t.value.([]term)
+	if !ok {
+		return []string{}, errors.Errorf("Match error: Expected a []term got '%T' JSON: %s", t.value, string(json))
+	}
+
+	for _, v := range values {
+		stringValue, ok := v.value.(string)
+		if !ok {
+			return []string{}, errors.Errorf("Match error: Expected a scalar got '%T' JSON: %s", t.value, string(json))
+		}
+		result = append(result, stringValue)
+	}
+
+	return result, nil
+}
+
 func resolve(json []byte, path string) (term, error) {
 	t, err := parse(json)
 	if err != nil {
