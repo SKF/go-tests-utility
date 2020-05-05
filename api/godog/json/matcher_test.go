@@ -94,7 +94,7 @@ func TestReadStringArr(t *testing.T) {
 	_, err = ReadStringArr(json, ".key")
 	require.NotNil(t, err)
 
-	json = []byte(`{"apa" : "value" }`)
+	json = []byte(`{"apa" : ["value1", "value2"] }`)
 	_, err = ReadStringArr(json, ".key")
 	require.NotNil(t, err)
 
