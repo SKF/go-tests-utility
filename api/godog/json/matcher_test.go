@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gopkg.in/go-playground/assert.v1"
 )
 
 func TestMatcherSmoke(t *testing.T) {
@@ -73,6 +74,28 @@ func TestRead(t *testing.T) {
 
 	json = []byte(`{"apa" : "value" }`)
 	_, err = Read(json, ".key")
+	require.NotNil(t, err)
+
+}
+
+func TestReadStringArr(t *testing.T) {
+	json := []byte(`{"key" : ["value1", "value2"]}`)
+	result, err := ReadStringArr(json, ".key")
+	require.Nil(t, err)
+	require.Len(t, result, 2)
+	assert.Equal(t, "value1", result[0])
+	assert.Equal(t, "value2", result[1])
+
+	json = []byte(`{"key" : "value" }`)
+	_, err = ReadStringArr(json, ".key")
+	require.NotNil(t, err)
+
+	json = []byte(`{"key" : {"value" : 98} }`)
+	_, err = ReadStringArr(json, ".key")
+	require.NotNil(t, err)
+
+	json = []byte(`{"apa" : "value" }`)
+	_, err = ReadStringArr(json, ".key")
 	require.NotNil(t, err)
 
 }
