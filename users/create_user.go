@@ -73,18 +73,27 @@ func Create(accessToken, stage, companyID, email string) (_ User, password strin
 		return
 	}
 
-	const subject = "Welcome to SKF Digital Services"
-	actualEmail, err := disposable_emails.PollForMessageWithSubject(email, subject, startedAt)
-	if err != nil {
-		return
-	}
-
-	temporaryPassword, err := getTemporaryPassword(actualEmail)
+	temporaryPassword, err := PollForTemporaryPassword(email, startedAt)
 	if err != nil {
 		return
 	}
 
 	return respBody.Data, temporaryPassword, nil
+}
+
+func PollForTemporaryPassword(email string, startedAt time.Time) (string, error) {
+	const subject = "Welcome to SKF Digital Services"
+	actualEmail, err := disposable_emails.PollForMessageWithSubject(email, subject, startedAt)
+	if err != nil {
+		return "", err
+	}
+
+	temporaryPassword, err := getTemporaryPassword(actualEmail)
+	if err != nil {
+		return "", err
+	}
+
+	return temporaryPassword, nil
 }
 
 func getTemporaryPassword(emailMessage string) (string, error) {
