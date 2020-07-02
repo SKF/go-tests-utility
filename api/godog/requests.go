@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/SKF/go-utility/log"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -108,6 +109,10 @@ func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr strin
 }
 
 func (api *BaseFeature) ExecuteTheRequest() (err error) {
+	defer func() {
+		log.Debugf("Response: %s", api.Response.Body)
+	}()
+
 	jsonBody, err := json.Marshal(api.Request.Body)
 	if err != nil {
 		return errors.Wrap(err, "json.Marshal failed")
