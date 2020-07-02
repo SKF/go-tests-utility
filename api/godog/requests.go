@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/SKF/go-utility/log"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -141,6 +142,7 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 	api.Response.Raw = resp
 	api.Response.Body = body
 
+	log.Debugf("Response: %s", body)
 	return nil
 }
 
