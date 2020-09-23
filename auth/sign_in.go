@@ -8,7 +8,6 @@ import (
 	"github.com/SKF/go-utility/v2/auth/cachedauth"
 )
 
-const ssoBaseURL = "https://sso-api.%s.users.enlight.skf.com"
 var lock sync.Mutex
 
 // SignIn will sign in the user and if needed complete the change password challenge
