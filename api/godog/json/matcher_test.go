@@ -62,6 +62,20 @@ func TestMatcherArray(t *testing.T) {
 	require.Nil(t, Match(json, ".keyA[1]", "value2"))
 }
 
+func TestMatcherArrayRoot(t *testing.T) {
+	json := []byte(`["value1", "value2"]`)
+	require.Nil(t, Match(json, "[1]", "value2"))
+}
+
+func TestArrayLen(t *testing.T) {
+	require.Nil(t, ArrayLen([]byte(`{"data" ["value1", "value2"]}`), ".data", 2))
+	require.Nil(t, ArrayLen([]byte(`{"data" ["value1", "value2"]}`), ".data", 2))
+	require.Nil(t, ArrayLen([]byte(`["value1", "value2"]`), ".", 2))
+
+	require.NotNil(t, ArrayLen([]byte(`{"data" "value1"}`), ".data", -1))
+	require.NotNil(t, ArrayLen([]byte(`{"data" null}`), ".data", -1))
+}
+
 func TestRead(t *testing.T) {
 	json := []byte(`{"key" : "value"}`)
 	result, err := Read(json, ".key")
@@ -97,5 +111,4 @@ func TestReadStringArr(t *testing.T) {
 	json = []byte(`{"apa" : ["value1", "value2"] }`)
 	_, err = ReadStringArr(json, ".key")
 	require.NotNil(t, err)
-
 }
