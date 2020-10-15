@@ -41,17 +41,6 @@ func Match(json []byte, path string, pattern string) error {
 	return nil
 }
 
-func revertLegacySyntax(path string) string {
-	// Remove brackets earlier they were used for array indexing
-	bracketRegexp := regexp.MustCompile(`\.?\[(\d+)]`)
-	path = bracketRegexp.ReplaceAllString(path, ".$1")
-
-	if strings.HasPrefix(path, ".") {
-		path = string([]rune(path)[1:])
-	}
-
-	return path
-}
 
 func ArrayLen(json []byte, path string, length int) error {
 	path = revertLegacySyntax(path)
@@ -102,4 +91,20 @@ func ReadStringArr(json []byte, path string) (result []string, err error) {
 	}
 
 	return result, nil
+}
+
+func revertLegacySyntax(path string) string {
+	// Remove brackets earlier they were used for array indexing
+	bracketRegexp := regexp.MustCompile(`\.?\[(\d+)]`)
+	path = bracketRegexp.ReplaceAllString(path, ".$1")
+
+	if strings.HasPrefix(path, ".") {
+		path = string([]rune(path)[1:])
+	}
+
+	if path == "" {
+		path = "@this"
+	}
+
+	return path
 }

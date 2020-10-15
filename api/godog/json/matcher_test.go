@@ -70,6 +70,9 @@ func TestMatcherArrayRoot(t *testing.T) {
 func TestArrayLen(t *testing.T) {
 	require.Nil(t, ArrayLen([]byte(`{"data" ["value1", "value2"]}`), ".data", 2))
 	require.Nil(t, ArrayLen([]byte(`{"data" ["value1", "value2"]}`), ".data", 2))
+	require.Nil(t, ArrayLen([]byte(`["value1", "value2"]`), ".", 2))
+	require.Nil(t, ArrayLen([]byte(`["value1"]`), "", 1))
+	require.Nil(t, ArrayLen([]byte(`["value1", 1]`), "", 2))
 
 	require.NotNil(t, ArrayLen([]byte(`{"data" "value1"}`), ".data", -1))
 	require.NotNil(t, ArrayLen([]byte(`{"data" null}`), ".data", -1))
@@ -88,7 +91,6 @@ func TestRead(t *testing.T) {
 	json = []byte(`{"apa" : "value" }`)
 	_, err = Read(json, ".key")
 	require.NotNil(t, err)
-
 }
 
 func TestReadStringArr(t *testing.T) {
