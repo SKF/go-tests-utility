@@ -21,7 +21,7 @@ func MatchNull(json []byte, path string) error {
 		return nil
 	}
 
-	return errors.Errorf("Match error: Expected null got '%T' JSON: %s", result.String(), string(json))
+	return errors.Errorf("Match error: Expected null got '%s' JSON: %s", result.String(), string(json))
 }
 
 func Match(json []byte, path string, pattern string) error {
@@ -84,8 +84,8 @@ func ReadStringArr(json []byte, path string) (result []string, err error) {
 
 	for _, v := range res.Array() {
 		stringValue := v.String()
-		if !(v.IsObject() || !v.IsArray()) {
-			return []string{}, errors.Errorf("Match error: Expected a scalar got: %s", v.String())
+		if !isScalar(v) {
+			return []string{}, errors.Errorf("Match error: Expected a scalar got: %s", stringValue)
 		}
 		result = append(result, stringValue)
 	}
@@ -93,14 +93,16 @@ func ReadStringArr(json []byte, path string) (result []string, err error) {
 	return result, nil
 }
 
+func isScalar(v gjson.Result) bool {
+	return !v.IsArray() && !v.IsObject()
+}
+
 func revertLegacySyntax(path string) string {
 	// Remove brackets earlier they were used for array indexing
 	bracketRegexp := regexp.MustCompile(`\.?\[(\d+)]`)
 	path = bracketRegexp.ReplaceAllString(path, ".$1")
 
-	if strings.HasPrefix(path, ".") {
-		path = string([]rune(path)[1:])
-	}
+	path = strings.TrimPrefix(path, ".")
 
 	if path == "" {
 		path = "@this"
