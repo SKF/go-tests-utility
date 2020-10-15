@@ -114,6 +114,10 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 		return errors.Wrap(err, "json.Marshal failed")
 	}
 
+	if len(api.Request.Body) == 0 {
+		jsonBody = nil
+	}
+
 	return api.ExecuteTheRequestWithPayload(jsonBody)
 }
 

@@ -63,8 +63,8 @@ func TestMatcherArray(t *testing.T) {
 }
 
 func TestMatcherArrayRoot(t *testing.T) {
-	json := []byte(`["value1", "value2"]`)
-	require.Nil(t, Match(json, "[1]", "value2"))
+	require.Nil(t, Match([]byte(`["value1", "value2"]`), "[1]", "value2"))
+	require.Nil(t, Match([]byte(`["value1", "value2"]`), ".[1]", "value2"))
 }
 
 func TestArrayLen(t *testing.T) {

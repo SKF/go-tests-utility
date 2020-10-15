@@ -8,28 +8,6 @@ import (
 	"strings"
 )
 
-type term struct {
-	jsonType int
-	value    interface{}
-}
-
-type segment struct {
-	key     string
-	index   int64
-	indexed bool
-}
-
-const (
-	jsonNumber = iota
-	jsonString = iota
-	jsonBool   = iota
-	jsonNull   = iota
-	jsonArray  = iota
-	jsonObject = iota
-)
-
-var null = term{jsonType: jsonNull, value: nil}
-
 func MatchNull(json []byte, path string) error {
 	if bytes.Equal(bytes.TrimSpace(json), []byte("null")) && (path == "" || path == ".") {
 		return nil
@@ -65,7 +43,7 @@ func Match(json []byte, path string, pattern string) error {
 
 func revertLegacySyntax(path string) string {
 	// Remove brackets earlier they were used for array indexing
-	bracketRegexp := regexp.MustCompile(`\.?\[(\d+)\]`)
+	bracketRegexp := regexp.MustCompile(`\.?\[(\d+)]`)
 	path = bracketRegexp.ReplaceAllString(path, ".$1")
 
 	if strings.HasPrefix(path, ".") {
