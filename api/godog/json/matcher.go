@@ -65,7 +65,7 @@ func Read(json []byte, path string) (result string, err error) {
 	res := gjson.Get(string(json), path)
 
 	if !res.Exists() || res.IsObject() || res.IsArray() {
-		return "", errors.Errorf("Match error: Expected a scalar got '%T' JSON: %s", res.String(), string(json))
+		return "", errors.Errorf("Match error: Expected a scalar got '%s' JSON: %s", res.String(), string(json))
 	}
 
 	return res.String(), nil
