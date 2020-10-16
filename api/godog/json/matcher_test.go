@@ -106,9 +106,6 @@ func TestReadStringArr(t *testing.T) {
 	require.Nil(t, err)
 	assert.Equal(t, []string{"apa", ""}, result)
 
-	result, err = ReadStringArr([]byte(`["apa", {"a":1}]`), "")
-	require.Nil(t, err)
-	assert.Equal(t, []string{"apa", "1"}, result)
 
 	_, err = ReadStringArr([]byte(`{"key" : "value" }`), ".key")
 	require.NotNil(t, err)
@@ -117,5 +114,8 @@ func TestReadStringArr(t *testing.T) {
 	require.NotNil(t, err)
 
 	_, err = ReadStringArr([]byte(`{"apa" : ["value1", "value2"] }`), ".key")
+	require.NotNil(t, err)
+
+	result, err = ReadStringArr([]byte(`["apa", {"a":1}]`), "")
 	require.NotNil(t, err)
 }
