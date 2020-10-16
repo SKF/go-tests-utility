@@ -116,6 +116,6 @@ func TestReadStringArr(t *testing.T) {
 	_, err = ReadStringArr([]byte(`{"apa" : ["value1", "value2"] }`), ".key")
 	require.NotNil(t, err)
 
-	result, err = ReadStringArr([]byte(`["apa", {"a":1}]`), "")
+	_, err = ReadStringArr([]byte(`["apa", {"a":1}]`), "")
 	require.NotNil(t, err)
 }
