@@ -62,6 +62,22 @@ func TestMatcherArray(t *testing.T) {
 	require.Nil(t, Match(json, ".keyA[1]", "value2"))
 }
 
+func TestMatcherArrayRoot(t *testing.T) {
+	require.Nil(t, Match([]byte(`["value1", "value2"]`), "[1]", "value2"))
+	require.Nil(t, Match([]byte(`["value1", "value2"]`), ".[1]", "value2"))
+}
+
+func TestArrayLen(t *testing.T) {
+	require.Nil(t, ArrayLen([]byte(`{"data" ["value1", "value2"]}`), ".data", 2))
+	require.Nil(t, ArrayLen([]byte(`{"data" ["value1", "value2"]}`), ".data", 2))
+	require.Nil(t, ArrayLen([]byte(`["value1", "value2"]`), ".", 2))
+	require.Nil(t, ArrayLen([]byte(`["value1"]`), "", 1))
+	require.Nil(t, ArrayLen([]byte(`["value1", 1]`), "", 2))
+
+	require.NotNil(t, ArrayLen([]byte(`{"data" "value1"}`), ".data", -1))
+	require.NotNil(t, ArrayLen([]byte(`{"data" null}`), ".data", -1))
+}
+
 func TestRead(t *testing.T) {
 	json := []byte(`{"key" : "value"}`)
 	result, err := Read(json, ".key")
@@ -75,27 +91,31 @@ func TestRead(t *testing.T) {
 	json = []byte(`{"apa" : "value" }`)
 	_, err = Read(json, ".key")
 	require.NotNil(t, err)
-
 }
 
 func TestReadStringArr(t *testing.T) {
-	json := []byte(`{"key" : ["value1", "value2"]}`)
-	result, err := ReadStringArr(json, ".key")
+	result, err := ReadStringArr([]byte(`{"key" : ["value1", "value2"]}`), ".key")
 	require.Nil(t, err)
-	require.Len(t, result, 2)
-	assert.Equal(t, "value1", result[0])
-	assert.Equal(t, "value2", result[1])
+	assert.Equal(t, []string{"value1", "value2"}, result)
 
-	json = []byte(`{"key" : "value" }`)
-	_, err = ReadStringArr(json, ".key")
+	result, err = ReadStringArr([]byte(`["apa"]`), "")
+	require.Nil(t, err)
+	assert.Equal(t, []string{"apa"}, result)
+
+	result, err = ReadStringArr([]byte(`["apa", ""]`), "")
+	require.Nil(t, err)
+	assert.Equal(t, []string{"apa", ""}, result)
+
+
+	_, err = ReadStringArr([]byte(`{"key" : "value" }`), ".key")
 	require.NotNil(t, err)
 
-	json = []byte(`{"key" : {"value" : 98} }`)
-	_, err = ReadStringArr(json, ".key")
+	_, err = ReadStringArr([]byte(`{"key" : {"value" : 98} }`), ".key")
 	require.NotNil(t, err)
 
-	json = []byte(`{"apa" : ["value1", "value2"] }`)
-	_, err = ReadStringArr(json, ".key")
+	_, err = ReadStringArr([]byte(`{"apa" : ["value1", "value2"] }`), ".key")
 	require.NotNil(t, err)
 
+	_, err = ReadStringArr([]byte(`["apa", {"a":1}]`), "")
+	require.NotNil(t, err)
 }
