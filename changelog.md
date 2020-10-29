@@ -1,1 +1,1 @@
-* rename companies package to hierrachy
+* rename companies package to hierarchy
