@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/SKF/go-utility/log"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -122,7 +123,11 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 }
 
 func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error) {
-	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bytes.NewBuffer(payload))
+	var bodyBuffer io.Reader
+	if payload != nil {
+		bodyBuffer = bytes.NewBuffer(payload)
+	}
+	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bodyBuffer)
 	if err != nil {
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
