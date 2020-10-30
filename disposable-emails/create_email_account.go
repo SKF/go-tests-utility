@@ -18,8 +18,10 @@ import (
 
 const disposableEmailsBaseURL = "https://api.disposable-emails.enlight.skf.com"
 
-func NewEmailAddress() (_ string, err error) {
-	const url = disposableEmailsBaseURL + "/email-addresses/new"
+func NewEmailWithPrefix(prefix string) (_ string, err error){
+	prefix = strings.ToLower(prefix)
+
+	url := fmt.Sprintf("%s/email-addresses/new?prefix=%s", disposableEmailsBaseURL, prefix)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -44,6 +46,10 @@ func NewEmailAddress() (_ string, err error) {
 	}
 
 	return respBody.Data.EmailAddress, nil
+}
+
+func NewEmailAddress() (_ string, err error) {
+	return NewEmailWithPrefix("")
 }
 
 func PollForMessageWithSubject(emailAddress, subject string, fromTimestamp time.Time) (string, error) {

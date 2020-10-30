@@ -1,4 +1,4 @@
-package companies
+package hierarchy
 
 import (
 	"bytes"
@@ -12,7 +12,13 @@ import (
 
 const hierarchyBaseURL = "https://api.%s.hierarchy.enlight.skf.com"
 
-func Create(identityToken, stage, parentNodeID, label, description string) (_ string, err error) {
+const companyType = "company"
+
+func CreateCompany(identityToken, stage, parentNodeID, label, description string) (_ string, err error) {
+	return Create(identityToken, stage, parentNodeID, label, description, companyType, companyType)
+}
+
+func Create(identityToken, stage, parentNodeID, label, description, nodetype, subtype string) (_ string, err error) {
 	requestBody := struct {
 		ParentID    string `json:"parentId"`
 		Label       string `json:"label"`
@@ -23,8 +29,8 @@ func Create(identityToken, stage, parentNodeID, label, description string) (_ st
 		ParentID:    parentNodeID,
 		Label:       label,
 		Description: description,
-		Type:        "company",
-		SubType:     "company",
+		Type:        nodetype,
+		SubType:     subtype,
 	}
 
 	body, err := json.Marshal(requestBody)
@@ -74,8 +80,8 @@ func Create(identityToken, stage, parentNodeID, label, description string) (_ st
 	return responseBody.ID, nil
 }
 
-func Delete(identityToken, stage, companyID string) error {
-	url := fmt.Sprintf(hierarchyBaseURL+"/nodes/%s", stage, companyID)
+func Delete(identityToken, stage, nodeID string) error {
+	url := fmt.Sprintf(hierarchyBaseURL+"/nodes/%s", stage, nodeID)
 
 	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
