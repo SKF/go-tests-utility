@@ -115,7 +115,7 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 		return errors.Wrap(err, "json.Marshal failed")
 	}
 
-	if len(api.Request.Body) == 0 {
+	if api.Request.Method == http.MethodGet {
 		jsonBody = nil
 	}
 
@@ -123,10 +123,14 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 }
 
 func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error) {
+	log.Debugf("Request %s: %s\n", api.Request.Method, payload)
+	log.Debugf("req headers: %v\n", api.Request.Headers)
+
 	var bodyBuffer io.Reader
 	if payload != nil {
 		bodyBuffer = bytes.NewBuffer(payload)
 	}
+
 	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bodyBuffer)
 	if err != nil {
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
@@ -134,6 +138,7 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 
 	req.Header = api.Request.Headers
 	req.Header.Set("Content-Type", "application/json")
+
 
 	api.Request.ExecutionTime = time.Now()
 	client := &http.Client{}
