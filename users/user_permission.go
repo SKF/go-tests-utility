@@ -21,7 +21,6 @@ func AddUserRole(identityToken, stage, userID, role string) (err error) {
 }
 
 func getUser(identityToken, stage, userID string) (user user, err error) {
-	fmt.Printf("userID: %v\n", userID)
 	if userID == "" {
 		return user, fmt.Errorf("userID is required")
 	}
