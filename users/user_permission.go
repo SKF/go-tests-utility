@@ -21,6 +21,11 @@ func AddUserRole(identityToken, stage, userID, role string) (err error) {
 }
 
 func getUser(identityToken, stage, userID string) (user user, err error) {
+	fmt.Printf("userID: %v\n", userID)
+	if userID == "" {
+		return user, fmt.Errorf("userID is required")
+	}
+
 	url := fmt.Sprintf(accessMgmtBaseURL+"/users/%s", stage, userID)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
