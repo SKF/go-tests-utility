@@ -137,10 +137,7 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
 
-	if payload != nil {
-		req.Header = api.Request.Headers
-		req.Header.Set("Content-Type", "application/json")
-	}
+	req.Header = api.Request.Headers
 
 	api.Request.ExecutionTime = time.Now()
 	client := &http.Client{}
