@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/SKF/go-utility/log"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/SKF/go-utility/log"
 
 	http_model "github.com/SKF/go-utility/http-model"
 	"github.com/pkg/errors"
@@ -137,8 +138,6 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 	}
 
 	req.Header = api.Request.Headers
-	req.Header.Set("Content-Type", "application/json")
-
 
 	api.Request.ExecutionTime = time.Now()
 	client := &http.Client{}

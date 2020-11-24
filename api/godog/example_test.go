@@ -38,6 +38,8 @@ func TestCreateInvalidRequest(t *testing.T) {
 
 	err := api.CreatePathRequest(http.MethodPost, "/posts")
 	require.NoError(t, err)
+	err = api.SetRequestHeaderParameterTo("Content-Type", "application/json")
+	require.NoError(t, err)
 
 	err = api.ExecuteInvalidRequest()
 	require.NoError(t, err)
