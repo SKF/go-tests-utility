@@ -148,7 +148,7 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 
 	api.Request.ExecutionTime = time.Now()
 	client := &http.Client{}
-	dd
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrapf(err, "client.Do failed - header: `%+v`", req.Header)
