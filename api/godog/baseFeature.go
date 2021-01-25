@@ -1,6 +1,7 @@
 package godog
 
 import (
+	"context"
 	"net/http"
 	"time"
 )
@@ -10,8 +11,13 @@ type BaseFeature struct {
 	Response  response
 	Request   Request
 	baseURL   string
+	ctx       context.Context
 
 	GetValue func(key string) (value string, err error)
+}
+
+func (api *BaseFeature) SetContext(ctx context.Context) {
+	api.ctx = ctx
 }
 
 func (api *BaseFeature) SetBaseUrl(baseUrl string) {

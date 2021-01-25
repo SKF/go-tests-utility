@@ -11,12 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SKF/go-utility/log"
-
-	http_model "github.com/SKF/go-utility/http-model"
-	"github.com/pkg/errors"
-
 	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
+	http_model "github.com/SKF/go-utility/http-model"
+	"github.com/SKF/go-utility/log"
+	"github.com/pkg/errors"
+	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 func (api *BaseFeature) CreatePathRequest(method, path string) error {
@@ -136,11 +135,20 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 	if err != nil {
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
-
 	req.Header = api.Request.Headers
+	req = req.WithContext(api.ctx)
+	if span, ok := dd_tracer.SpanFromContext(api.ctx); ok {
+		log.Debug("Injecting trace headers")
+
+		err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header))
+		if err != nil {
+			return err
+		}
+	}
 
 	api.Request.ExecutionTime = time.Now()
 	client := &http.Client{}
+	dd
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrapf(err, "client.Do failed - header: `%+v`", req.Header)
