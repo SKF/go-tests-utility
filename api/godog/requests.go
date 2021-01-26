@@ -2,6 +2,7 @@ package godog
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -109,7 +110,11 @@ func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr strin
 	return
 }
 
-func (api *BaseFeature) ExecuteTheRequest() (err error) {
+func (api *BaseFeature) ExecuteTheRequest() error {
+	return api.ExecuteTheRequestWithContext(context.Background())
+}
+
+func (api *BaseFeature) ExecuteTheRequestWithContext(ctx context.Context) (err error) {
 	jsonBody, err := json.Marshal(api.Request.Body)
 	if err != nil {
 		return errors.Wrap(err, "json.Marshal failed")
@@ -119,10 +124,14 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 		jsonBody = nil
 	}
 
-	return api.ExecuteTheRequestWithPayload(jsonBody)
+	return api.ExecuteTheRequestWithPayloadAndContext(ctx, jsonBody)
 }
 
-func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error) {
+func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) error {
+	return api.ExecuteTheRequestWithPayloadAndContext(context.Background(), payload)
+}
+
+func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Context, payload []byte) (err error) {
 	log.Debugf("Request %s: %s\n", api.Request.Method, payload)
 	log.Debugf("req headers: %v\n", api.Request.Headers)
 
@@ -136,13 +145,10 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
 	req.Header = api.Request.Headers
-	req = req.WithContext(api.ctx)
-	if span, ok := dd_tracer.SpanFromContext(api.ctx); ok {
-		log.Debug("Injecting trace headers")
-
-		err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header))
-		if err != nil {
-			return err
+	req = req.WithContext(ctx)
+	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
+		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
+			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
 		}
 	}
 
@@ -168,8 +174,12 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 }
 
 func (api *BaseFeature) ExecuteInvalidRequest() error {
+	return api.ExecuteInvalidRequestWithContext(context.Background())
+}
+
+func (api *BaseFeature) ExecuteInvalidRequestWithContext(ctx context.Context) error {
 	invalidBody := []byte(`{ "param": "value",}`)
-	return api.ExecuteTheRequestWithPayload(invalidBody)
+	return api.ExecuteTheRequestWithPayloadAndContext(ctx, invalidBody)
 }
 
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
