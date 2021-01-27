@@ -13,7 +13,7 @@ import (
 
 const accessMgmtBaseURL = "https://api-web.%s.users.enlight.skf.com"
 
-func AddUserAccess(ctx context.Context, identityToken, stage, userID, nodeID string) error {
+func AddUserAccess(identityToken, stage, userID, nodeID string) error {
 	return AddUserAccessWithContext(context.Background(), identityToken, stage, userID, nodeID)
 }
 
