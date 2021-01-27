@@ -145,8 +145,8 @@ func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Conte
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
 	req.Header = api.Request.Headers
-	req = req.WithContext(ctx)
 	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
+		req = req.Clone(ctx)
 		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
 			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
 		}

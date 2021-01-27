@@ -2,12 +2,14 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/pkg/errors"
+	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 type HttpClient struct {
@@ -30,6 +32,10 @@ func NewWithToken(token string) *HttpClient {
 }
 
 func (c *HttpClient) FetchToken(stage, username, password string) error {
+	return c.FetchTokenWithContext(context.Background(), stage, username, password)
+}
+
+func (c *HttpClient) FetchTokenWithContext(ctx context.Context, stage, username, password string) error {
 	client := &http.Client{}
 
 	in := struct {
@@ -60,6 +66,13 @@ func (c *HttpClient) FetchToken(stage, username, password string) error {
 
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("content-type", "application/json")
+
+	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
+		req = req.Clone(ctx)
+		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
+			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
+		}
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
