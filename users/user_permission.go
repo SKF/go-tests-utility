@@ -2,25 +2,31 @@ package users
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/pkg/errors"
+	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
-func AddUserRole(identityToken, stage, userID, role string) (err error) {
-	user, err := getUser(identityToken, stage, userID)
+// func AddUserRole(identityToken, stage, userID, role string) error {
+// 	return AddUserRoleWithContext(context.Background(), identityToken, stage, userID, role)
+// }
+
+func AddUserRoleWithContext(ctx context.Context, identityToken, stage, userID, role string) (err error) {
+	user, err := getUser(ctx, identityToken, stage, userID)
 	if err != nil {
 		return
 	}
 
 	user.UserRoles = append(user.UserRoles, role)
-	return updateUser(identityToken, stage, user)
+	return updateUser(ctx, identityToken, stage, user)
 }
 
-func getUser(identityToken, stage, userID string) (user user, err error) {
+func getUser(ctx context.Context, identityToken, stage, userID string) (user user, err error) {
 	if userID == "" {
 		return user, fmt.Errorf("userID is required")
 	}
@@ -30,6 +36,13 @@ func getUser(identityToken, stage, userID string) (user user, err error) {
 	if err != nil {
 		err = errors.Wrap(err, "http.NewRequest failed")
 		return
+	}
+	req = req.WithContext(ctx)
+	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
+		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
+			err = errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
+			return
+		}
 	}
 
 	req.Header.Set("Authorization", identityToken)
@@ -63,7 +76,7 @@ func getUser(identityToken, stage, userID string) (user user, err error) {
 	return user, err
 }
 
-func updateUser(identityToken, stage string, user user) (err error) {
+func updateUser(ctx context.Context, identityToken, stage string, user user) (err error) {
 	url := fmt.Sprintf(accessMgmtBaseURL+"/users/%s", stage, user.ID)
 
 	body, err := json.Marshal(user)
@@ -74,6 +87,12 @@ func updateUser(identityToken, stage string, user user) (err error) {
 	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(body))
 	if err != nil {
 		return errors.Wrap(err, "http.NewRequest failed")
+	}
+	req = req.WithContext(ctx)
+	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
+		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
+			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
+		}
 	}
 
 	req.Header.Set("Authorization", identityToken)

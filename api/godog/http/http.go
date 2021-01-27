@@ -63,16 +63,15 @@ func (c *HttpClient) FetchTokenWithContext(ctx context.Context, stage, username,
 	if err != nil {
 		return errors.Wrapf(err, "Failed to create POST request to endpoint: %s", url)
 	}
-
-	req.Header.Set("accept", "application/json")
-	req.Header.Set("content-type", "application/json")
-
+	req = req.WithContext(ctx)
 	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
-		req = req.Clone(ctx)
 		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
 			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
 		}
 	}
+
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("content-type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -89,22 +88,38 @@ func (c *HttpClient) FetchTokenWithContext(ctx context.Context, stage, username,
 }
 
 func (c *HttpClient) Get(url string, out interface{}) (*HttpResponse, error) {
-	return c.send("GET", url, nil, out)
+	return c.GetWithContext(context.Background(), url, out)
+}
+
+func (c *HttpClient) GetWithContext(ctx context.Context, url string, out interface{}) (*HttpResponse, error) {
+	return c.send(ctx, "GET", url, nil, out)
 }
 
 func (c *HttpClient) Post(url string, in interface{}, out interface{}) (*HttpResponse, error) {
-	return c.send("POST", url, in, out)
+	return c.PostWithContext(context.Background(), url, in, out)
+}
+
+func (c *HttpClient) PostWithContext(ctx context.Context, url string, in interface{}, out interface{}) (*HttpResponse, error) {
+	return c.send(ctx, "POST", url, in, out)
 }
 
 func (c *HttpClient) Put(url string, in interface{}, out interface{}) (*HttpResponse, error) {
-	return c.send("PUT", url, in, out)
+	return c.PutWithContext(context.Background(), url, in, out)
+}
+
+func (c *HttpClient) PutWithContext(ctx context.Context, url string, in interface{}, out interface{}) (*HttpResponse, error) {
+	return c.send(ctx, "PUT", url, in, out)
 }
 
 func (c *HttpClient) Delete(url string, out interface{}) (*HttpResponse, error) {
-	return c.send("DELETE", url, nil, out)
+	return c.DeleteWithContext(context.Background(), url, out)
 }
 
-func (c *HttpClient) send(method, url string, in interface{}, out interface{}) (*HttpResponse, error) {
+func (c *HttpClient) DeleteWithContext(ctx context.Context, url string, out interface{}) (*HttpResponse, error) {
+	return c.send(ctx, "DELETE", url, nil, out)
+}
+
+func (c *HttpClient) send(ctx context.Context, method, url string, in interface{}, out interface{}) (*HttpResponse, error) {
 	client := &http.Client{}
 
 	bs := new(bytes.Buffer)
@@ -119,6 +134,12 @@ func (c *HttpClient) send(method, url string, in interface{}, out interface{}) (
 	req, err := http.NewRequest(method, url, bs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed to create %s request to endpoint: %s", method, url)
+	}
+	req = req.WithContext(ctx)
+	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
+		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
+			return nil, errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
+		}
 	}
 
 	req.Header.Set("accept", "application/json")

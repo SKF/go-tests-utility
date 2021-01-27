@@ -1,17 +1,23 @@
 package users
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
-	"github.com/SKF/go-utility/v2/uuid"
 	"github.com/SKF/go-utility/v2/log"
+	"github.com/SKF/go-utility/v2/uuid"
 	"github.com/pkg/errors"
+	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 const accessMgmtBaseURL = "https://api-web.%s.users.enlight.skf.com"
 
-func AddUserAccess(identityToken, stage, userID, nodeID string) (err error) {
+func AddUserAccess(ctx context.Context, identityToken, stage, userID, nodeID string) error {
+	return AddUserAccessWithContext(context.Background(), identityToken, stage, userID, nodeID)
+}
+
+func AddUserAccessWithContext(ctx context.Context, identityToken, stage, userID, nodeID string) (err error) {
 	log.Debugf("Adding access %s - %s", userID, nodeID)
 	if !uuid.IsValid(userID) {
 		return fmt.Errorf("Invalid User ID: %q", userID)
@@ -21,6 +27,12 @@ func AddUserAccess(identityToken, stage, userID, nodeID string) (err error) {
 	req, err := http.NewRequest(http.MethodPut, url, nil)
 	if err != nil {
 		return fmt.Errorf("http.NewRequest failed: %w", err)
+	}
+	req = req.WithContext(ctx)
+	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
+		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
+			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
+		}
 	}
 
 	req.Header.Set("Authorization", identityToken)

@@ -2,6 +2,7 @@ package users
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,11 +13,16 @@ import (
 	"github.com/pkg/errors"
 
 	disposable_emails "github.com/SKF/go-tests-utility/disposable-emails"
+	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 const identityMgmtBaseURL = "https://sso-api.%s.users.enlight.skf.com"
 
-func Create(accessToken, stage, companyID, email string) (_ User, password string, err error) {
+func Create(accessToken, stage, companyID, email string) (User, string, error) {
+	return CreateWithContext(context.Background(), accessToken, stage, companyID, email)
+}
+
+func CreateWithContext(ctx context.Context, accessToken, stage, companyID, email string) (_ User, password string, err error) {
 	startedAt := time.Now().Add(-1 * time.Second)
 
 	requestBody := struct {
@@ -40,6 +46,13 @@ func Create(accessToken, stage, companyID, email string) (_ User, password strin
 	if err != nil {
 		err = errors.Wrap(err, "http.NewRequest failed")
 		return
+	}
+	req = req.WithContext(ctx)
+	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
+		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
+			err = errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
+			return
+		}
 	}
 
 	req.Header.Set("Authorization", accessToken)
