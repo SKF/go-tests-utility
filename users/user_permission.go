@@ -12,9 +12,9 @@ import (
 	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
-// func AddUserRole(identityToken, stage, userID, role string) error {
-// 	return AddUserRoleWithContext(context.Background(), identityToken, stage, userID, role)
-// }
+func AddUserRole(identityToken, stage, userID, role string) error {
+	return AddUserRoleWithContext(context.Background(), identityToken, stage, userID, role)
+}
 
 func AddUserRoleWithContext(ctx context.Context, identityToken, stage, userID, role string) (err error) {
 	user, err := getUser(ctx, identityToken, stage, userID)
