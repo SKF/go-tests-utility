@@ -7,7 +7,6 @@ require (
 	github.com/SKF/go-utility v1.10.4
 	github.com/SKF/go-utility/v2 v2.12.0
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
-	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.6.1
