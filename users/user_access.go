@@ -33,7 +33,7 @@ func AddUserAccessWithContext(ctx context.Context, identityToken, stage, userID,
 		return fmt.Errorf("Invalid User ID: %q", userID)
 	}
 
-	req := client.Put("/users/{userId}/hierarchies/{hierarchyId}").
+	req := client.Put("/users/{userId}/hierarchies/{nodeId}").
 		Assign("userId", userID).
 		Assign("nodeId", nodeID).
 		SetHeader(headers.ContentType, "application/json")
