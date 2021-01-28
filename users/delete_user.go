@@ -18,8 +18,8 @@ func DeleteWithContext(ctx context.Context, identityToken, stage, userID string)
 		Assign("id", userID).
 		SetHeader(headers.ContentType, "application/json")
 
-	rest := httpClientIdentityMgmt(stage, identityToken)
-	resp, err := rest.Do(ctx, req)
+	restClient := httpClientIdentityMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
 		return errors.Wrap(err, "failed to execute request")
 	}

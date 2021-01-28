@@ -38,8 +38,8 @@ func AddUserAccessWithContext(ctx context.Context, identityToken, stage, userID,
 		Assign("nodeId", nodeID).
 		SetHeader(headers.ContentType, "application/json")
 
-	rest := httpClientAccessMgmt(stage, identityToken)
-	resp, err := rest.Do(ctx, req)
+	restClient := httpClientAccessMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
 		return errors.Wrap(err, "failed to execute request")
 	}

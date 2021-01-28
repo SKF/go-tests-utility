@@ -33,8 +33,8 @@ func getUser(ctx context.Context, identityToken, stage, userID string) (user use
 		Assign("id", userID).
 		SetHeader(headers.ContentType, "application/json")
 
-	rest := httpClientAccessMgmt(stage, identityToken)
-	resp, err := rest.Do(ctx, req)
+	restClient := httpClientAccessMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
 		err = errors.Wrap(err, "failed to execute request")
 		return
@@ -58,8 +58,8 @@ func updateUser(ctx context.Context, identityToken, stage string, user user) err
 		Assign("id", user.ID).
 		WithJSONPayload(user)
 
-	rest := httpClientAccessMgmt(stage, identityToken)
-	resp, err := rest.Do(ctx, req)
+	restClient := httpClientAccessMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
 		return errors.Wrap(err, "failed to execute request")
 	}

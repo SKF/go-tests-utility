@@ -45,8 +45,8 @@ func CreateWithContext(ctx context.Context, identityToken, stage, companyID, ema
 		Assign("companyId", companyID).
 		WithJSONPayload(requestBody)
 
-	rest := httpClientIdentityMgmt(stage, identityToken)
-	resp, err := rest.Do(ctx, req)
+	restClient := httpClientIdentityMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
 		err = errors.Wrap(err, "failed to execute request")
 		return

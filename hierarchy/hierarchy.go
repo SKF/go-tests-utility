@@ -54,8 +54,8 @@ func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, 
 	req := client.Post("/nodes").
 		WithJSONPayload(requestBody)
 
-	rest := httpClient(stage, identityToken)
-	resp, err := rest.Do(ctx, req)
+	restClient := httpClient(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
 		err = errors.Wrap(err, "failed to execute request")
 		return
@@ -86,8 +86,8 @@ func DeleteWithContext(ctx context.Context, identityToken, stage, nodeID string)
 		Assign("id", nodeID).
 		SetHeader(headers.ContentType, "application/json")
 
-	rest := httpClient(stage, identityToken)
-	resp, err := rest.Do(ctx, req)
+	restClient := httpClient(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
 		return errors.Wrap(err, "failed to execute request")
 	}
