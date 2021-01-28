@@ -1,32 +1,31 @@
 package users
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 
+	"github.com/SKF/go-rest-utility/client"
+	"github.com/go-http-utils/headers"
 	"github.com/pkg/errors"
 )
 
-func Delete(accessToken, stage, userID string) error {
-	url := fmt.Sprintf(identityMgmtBaseURL+"/users/%s", stage, userID)
-	req, err := http.NewRequest("DELETE", url, nil)
+func Delete(identityToken, stage, userID string) error {
+	return DeleteWithContext(context.Background(), identityToken, stage, userID)
+}
+
+func DeleteWithContext(ctx context.Context, identityToken, stage, userID string) error {
+	req := client.Delete("/users/{id}").
+		Assign("id", userID).
+		SetHeader(headers.ContentType, "application/json")
+
+	restClient := httpClientIdentityMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
-		return errors.Wrap(err, "http.NewRequest failed")
+		return errors.Wrap(err, "failed to execute request")
 	}
-
-	req.Header.Set("Authorization", accessToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "client.Do failed")
-	}
-
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
-		return errors.Errorf("wrong status: %q", resp.Status)
+		return errors.Errorf("wrong response status: %q", resp.Status)
 	}
 
 	return nil

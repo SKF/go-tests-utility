@@ -2,6 +2,7 @@ package godog
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SKF/go-utility/log"
-
-	http_model "github.com/SKF/go-utility/http-model"
 	"github.com/pkg/errors"
+	dd_http "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
 
 	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
+	http_model "github.com/SKF/go-utility/http-model"
+	"github.com/SKF/go-utility/log"
 )
 
 func (api *BaseFeature) CreatePathRequest(method, path string) error {
@@ -110,7 +111,11 @@ func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr strin
 	return
 }
 
-func (api *BaseFeature) ExecuteTheRequest() (err error) {
+func (api *BaseFeature) ExecuteTheRequest() error {
+	return api.ExecuteTheRequestWithContext(context.Background())
+}
+
+func (api *BaseFeature) ExecuteTheRequestWithContext(ctx context.Context) (err error) {
 	jsonBody, err := json.Marshal(api.Request.Body)
 	if err != nil {
 		return errors.Wrap(err, "json.Marshal failed")
@@ -120,10 +125,14 @@ func (api *BaseFeature) ExecuteTheRequest() (err error) {
 		jsonBody = nil
 	}
 
-	return api.ExecuteTheRequestWithPayload(jsonBody)
+	return api.ExecuteTheRequestWithPayloadAndContext(ctx, jsonBody)
 }
 
-func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error) {
+func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) error {
+	return api.ExecuteTheRequestWithPayloadAndContext(context.Background(), payload)
+}
+
+func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Context, payload []byte) (err error) {
 	log.Debugf("Request %s: %s\n", api.Request.Method, payload)
 	log.Debugf("req headers: %v\n", api.Request.Headers)
 
@@ -132,15 +141,20 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 		bodyBuffer = bytes.NewBuffer(payload)
 	}
 
-	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bodyBuffer)
+	req, err := http.NewRequestWithContext(ctx, api.Request.Method, api.Request.Url, bodyBuffer)
 	if err != nil {
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
-
 	req.Header = api.Request.Headers
 
 	api.Request.ExecutionTime = time.Now()
-	client := &http.Client{}
+	client := dd_http.WrapClient(
+		&http.Client{},
+		dd_http.RTWithResourceNamer(func(req *http.Request) string {
+			return fmt.Sprintf("%s %s", req.Method, req.URL.String())
+		}),
+	)
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrapf(err, "client.Do failed - header: `%+v`", req.Header)
@@ -160,8 +174,12 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) (err error)
 }
 
 func (api *BaseFeature) ExecuteInvalidRequest() error {
+	return api.ExecuteInvalidRequestWithContext(context.Background())
+}
+
+func (api *BaseFeature) ExecuteInvalidRequestWithContext(ctx context.Context) error {
 	invalidBody := []byte(`{ "param": "value",}`)
-	return api.ExecuteTheRequestWithPayload(invalidBody)
+	return api.ExecuteTheRequestWithPayloadAndContext(ctx, invalidBody)
 }
 
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {

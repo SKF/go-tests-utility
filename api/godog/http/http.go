@@ -2,12 +2,14 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/pkg/errors"
+	dd_http "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
 )
 
 type HttpClient struct {
@@ -30,8 +32,10 @@ func NewWithToken(token string) *HttpClient {
 }
 
 func (c *HttpClient) FetchToken(stage, username, password string) error {
-	client := &http.Client{}
+	return c.FetchTokenWithContext(context.Background(), stage, username, password)
+}
 
+func (c *HttpClient) FetchTokenWithContext(ctx context.Context, stage, username, password string) error {
 	in := struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -53,13 +57,19 @@ func (c *HttpClient) FetchToken(stage, username, password string) error {
 		return errors.Wrapf(err, "Failed marshal body for POST request to endpoint: %s", url)
 	}
 
-	req, err := http.NewRequest("POST", url, bs)
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bs)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to create POST request to endpoint: %s", url)
 	}
-
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("content-type", "application/json")
+
+	client := dd_http.WrapClient(
+		&http.Client{},
+		dd_http.RTWithResourceNamer(func(req *http.Request) string {
+			return fmt.Sprintf("%s %s", req.Method, req.URL.String())
+		}),
+	)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -76,24 +86,38 @@ func (c *HttpClient) FetchToken(stage, username, password string) error {
 }
 
 func (c *HttpClient) Get(url string, out interface{}) (*HttpResponse, error) {
-	return c.send("GET", url, nil, out)
+	return c.GetWithContext(context.Background(), url, out)
+}
+
+func (c *HttpClient) GetWithContext(ctx context.Context, url string, out interface{}) (*HttpResponse, error) {
+	return c.send(ctx, "GET", url, nil, out)
 }
 
 func (c *HttpClient) Post(url string, in interface{}, out interface{}) (*HttpResponse, error) {
-	return c.send("POST", url, in, out)
+	return c.PostWithContext(context.Background(), url, in, out)
+}
+
+func (c *HttpClient) PostWithContext(ctx context.Context, url string, in interface{}, out interface{}) (*HttpResponse, error) {
+	return c.send(ctx, "POST", url, in, out)
 }
 
 func (c *HttpClient) Put(url string, in interface{}, out interface{}) (*HttpResponse, error) {
-	return c.send("PUT", url, in, out)
+	return c.PutWithContext(context.Background(), url, in, out)
+}
+
+func (c *HttpClient) PutWithContext(ctx context.Context, url string, in interface{}, out interface{}) (*HttpResponse, error) {
+	return c.send(ctx, "PUT", url, in, out)
 }
 
 func (c *HttpClient) Delete(url string, out interface{}) (*HttpResponse, error) {
-	return c.send("DELETE", url, nil, out)
+	return c.DeleteWithContext(context.Background(), url, out)
 }
 
-func (c *HttpClient) send(method, url string, in interface{}, out interface{}) (*HttpResponse, error) {
-	client := &http.Client{}
+func (c *HttpClient) DeleteWithContext(ctx context.Context, url string, out interface{}) (*HttpResponse, error) {
+	return c.send(ctx, "DELETE", url, nil, out)
+}
 
+func (c *HttpClient) send(ctx context.Context, method, url string, in interface{}, out interface{}) (*HttpResponse, error) {
 	bs := new(bytes.Buffer)
 	sendBody := in != nil && (method == "POST" || method == "PUT")
 
@@ -103,17 +127,23 @@ func (c *HttpClient) send(method, url string, in interface{}, out interface{}) (
 		}
 	}
 
-	req, err := http.NewRequest(method, url, bs)
+	req, err := http.NewRequestWithContext(ctx, method, url, bs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed to create %s request to endpoint: %s", method, url)
 	}
-
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("authorization", c.token)
+
 	if sendBody {
 		req.Header.Set("content-type", "application/json")
 	}
 
+	client := dd_http.WrapClient(
+		&http.Client{},
+		dd_http.RTWithResourceNamer(func(req *http.Request) string {
+			return fmt.Sprintf("%s %s", req.Method, req.URL.String())
+		}),
+	)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, errors.Wrapf(err, "%s request to endpoint: %s failed", method, url)

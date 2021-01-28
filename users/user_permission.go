@@ -1,96 +1,74 @@
 package users
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
+	"github.com/SKF/go-rest-utility/client"
+	"github.com/go-http-utils/headers"
 	"github.com/pkg/errors"
 )
 
-func AddUserRole(identityToken, stage, userID, role string) (err error) {
-	user, err := getUser(identityToken, stage, userID)
+func AddUserRole(identityToken, stage, userID, role string) error {
+	return AddUserRoleWithContext(context.Background(), identityToken, stage, userID, role)
+}
+
+func AddUserRoleWithContext(ctx context.Context, identityToken, stage, userID, role string) (err error) {
+	user, err := getUser(ctx, identityToken, stage, userID)
 	if err != nil {
 		return
 	}
 
 	user.UserRoles = append(user.UserRoles, role)
-	return updateUser(identityToken, stage, user)
+	return updateUser(ctx, identityToken, stage, user)
 }
 
-func getUser(identityToken, stage, userID string) (user user, err error) {
+func getUser(ctx context.Context, identityToken, stage, userID string) (user user, err error) {
 	if userID == "" {
 		return user, fmt.Errorf("userID is required")
 	}
 
-	url := fmt.Sprintf(accessMgmtBaseURL+"/users/%s", stage, userID)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req := client.Get("/users/{id}").
+		Assign("id", userID).
+		SetHeader(headers.ContentType, "application/json")
+
+	restClient := httpClientAccessMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
-		err = errors.Wrap(err, "http.NewRequest failed")
+		err = errors.Wrap(err, "failed to execute request")
 		return
 	}
-
-	req.Header.Set("Authorization", identityToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		err = errors.Wrap(err, "client.Do failed")
-		return
-	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.Errorf("Wrong status: %q", resp.Status)
+		err = errors.Errorf("wrong response status: %q", resp.Status)
 		return
 	}
 
-	defer resp.Body.Close()
-	var body []byte
-	if body, err = ioutil.ReadAll(resp.Body); err != nil {
-		err = errors.New("couldn't read response body")
-		return
-	}
-
-	if err = json.Unmarshal(body, &user); err != nil {
-		err = errors.Errorf("couldn't decode response body, %s", string(body))
+	if err = resp.Unmarshal(&user); err != nil {
+		err = errors.Wrap(err, "failed to unmarshal body")
 		return
 	}
 
 	return user, err
 }
 
-func updateUser(identityToken, stage string, user user) (err error) {
-	url := fmt.Sprintf(accessMgmtBaseURL+"/users/%s", stage, user.ID)
+func updateUser(ctx context.Context, identityToken, stage string, user user) error {
+	req := client.Put("/users/{id}").
+		Assign("id", user.ID).
+		WithJSONPayload(user)
 
-	body, err := json.Marshal(user)
+	restClient := httpClientAccessMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
-		return errors.Wrap(err, "json.Marshal failed")
+		return errors.Wrap(err, "failed to execute request")
 	}
-
-	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(body))
-	if err != nil {
-		return errors.Wrap(err, "http.NewRequest failed")
-	}
-
-	req.Header.Set("Authorization", identityToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "client.Do failed")
-	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("Wrong status: %q", resp.Status)
+		return errors.Errorf("wrong response status: %q", resp.Status)
 	}
 
-	return err
+	return nil
 }
 
 type user struct {

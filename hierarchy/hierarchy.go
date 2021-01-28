@@ -1,24 +1,42 @@
 package hierarchy
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
+	"github.com/SKF/go-rest-utility/client"
+	"github.com/SKF/go-rest-utility/client/auth"
+	"github.com/go-http-utils/headers"
 	"github.com/pkg/errors"
 )
 
-const hierarchyBaseURL = "https://api.%s.hierarchy.enlight.skf.com"
+const (
+	hierarchyBaseURL = "https://api.%s.hierarchy.enlight.skf.com"
+	companyType      = "company"
+)
 
-const companyType = "company"
+func httpClient(stage, identityToken string) *client.Client {
+	return client.NewClient(
+		client.WithBaseURL(fmt.Sprintf(hierarchyBaseURL, stage)),
+		client.WithDatadogTracing(),
+		client.WithTokenProvider(auth.RawToken(identityToken)),
+	)
+}
 
 func CreateCompany(identityToken, stage, parentNodeID, label, description string) (_ string, err error) {
-	return Create(identityToken, stage, parentNodeID, label, description, companyType, companyType)
+	return CreateCompanyWithContext(context.Background(), identityToken, stage, parentNodeID, label, description)
+}
+
+func CreateCompanyWithContext(ctx context.Context, identityToken, stage, parentNodeID, label, description string) (_ string, err error) {
+	return CreateWithContext(ctx, identityToken, stage, parentNodeID, label, description, companyType, companyType)
 }
 
 func Create(identityToken, stage, parentNodeID, label, description, nodetype, subtype string) (_ string, err error) {
+	return CreateWithContext(context.Background(), identityToken, stage, parentNodeID, label, description, nodetype, subtype)
+}
+
+func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, label, description, nodetype, subtype string) (_ string, err error) {
 	requestBody := struct {
 		ParentID    string `json:"parentId"`
 		Label       string `json:"label"`
@@ -33,47 +51,26 @@ func Create(identityToken, stage, parentNodeID, label, description, nodetype, su
 		SubType:     subtype,
 	}
 
-	body, err := json.Marshal(requestBody)
-	if err != nil {
-		err = errors.Wrap(err, "json.Marshal failed")
-		return
-	}
+	req := client.Post("/nodes").
+		WithJSONPayload(requestBody)
 
-	url := fmt.Sprintf(hierarchyBaseURL+"/nodes", stage)
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	restClient := httpClient(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
-		err = errors.Wrap(err, "http.NewRequest failed")
-		return
-	}
-
-	req.Header.Set("Authorization", identityToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		err = errors.Wrap(err, "client.Do failed")
-		return
-	}
-
-	defer resp.Body.Close()
-	body, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		err = errors.Wrap(err, "ioutil.ReadAll failed")
+		err = errors.Wrap(err, "failed to execute request")
 		return
 	}
 
 	var responseBody struct {
 		ID string `json:"nodeId"`
 	}
-
-	if err = json.Unmarshal(body, &responseBody); err != nil {
-		err = errors.Wrapf(err, "json.Unmarshal failed, body: %s", string(body))
+	if err = resp.Unmarshal(&responseBody); err != nil {
+		err = errors.Wrap(err, "failed to unmarshal response")
 		return
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.Errorf("Wrong status: %q, body: %s", resp.Status, string(body))
+		err = errors.Errorf("wrong response status: %q", resp.Status)
 		return
 	}
 
@@ -81,29 +78,22 @@ func Create(identityToken, stage, parentNodeID, label, description, nodetype, su
 }
 
 func Delete(identityToken, stage, nodeID string) error {
-	url := fmt.Sprintf(hierarchyBaseURL+"/nodes/%s", stage, nodeID)
+	return DeleteWithContext(context.Background(), identityToken, stage, nodeID)
+}
 
-	req, err := http.NewRequest(http.MethodDelete, url, nil)
-	if err != nil {
-		return errors.Wrap(err, "http.NewRequest failed")
-	}
-	req.Header.Set("Authorization", identityToken)
-	req.Header.Set("Content-Type", "application/json")
+func DeleteWithContext(ctx context.Context, identityToken, stage, nodeID string) error {
+	req := client.Delete("/nodes/{id}").
+		Assign("id", nodeID).
+		SetHeader(headers.ContentType, "application/json")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	restClient := httpClient(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
 	if err != nil {
-		return errors.Wrap(err, "client.Do failed")
+		return errors.Wrap(err, "failed to execute request")
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return errors.Wrap(err, "ioutil.ReadAll failed")
-		}
-
-		return errors.Errorf("wrong status: %q, body: %s", resp.Status, string(body))
+		return errors.Errorf("wrong response status: %q", resp.Status)
 	}
 
 	return nil
