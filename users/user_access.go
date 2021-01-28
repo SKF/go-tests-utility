@@ -5,13 +5,23 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/SKF/go-rest-utility/client"
+	"github.com/SKF/go-rest-utility/client/auth"
 	"github.com/SKF/go-utility/v2/log"
 	"github.com/SKF/go-utility/v2/uuid"
+	"github.com/go-http-utils/headers"
 	"github.com/pkg/errors"
-	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 const accessMgmtBaseURL = "https://api-web.%s.users.enlight.skf.com"
+
+func httpClientAccessMgmt(stage, identityToken string) *client.Client {
+	return client.NewClient(
+		client.WithBaseURL(fmt.Sprintf(accessMgmtBaseURL, stage)),
+		client.WithDatadogTracing(),
+		client.WithTokenProvider(auth.RawToken(identityToken)),
+	)
+}
 
 func AddUserAccess(identityToken, stage, userID, nodeID string) error {
 	return AddUserAccessWithContext(context.Background(), identityToken, stage, userID, nodeID)
@@ -23,34 +33,19 @@ func AddUserAccessWithContext(ctx context.Context, identityToken, stage, userID,
 		return fmt.Errorf("Invalid User ID: %q", userID)
 	}
 
-	url := fmt.Sprintf(accessMgmtBaseURL+"/users/%s/hierarchies/%s", stage, userID, nodeID)
-	req, err := http.NewRequest(http.MethodPut, url, nil)
-	if err != nil {
-		return fmt.Errorf("http.NewRequest failed: %w", err)
-	}
-	req = req.WithContext(ctx)
-	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
-		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
-			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
-		}
-	}
+	req := client.Put("/users/{userId}/hierarchies/{hierarchyId}").
+		Assign("userId", userID).
+		Assign("nodeId", nodeID).
+		SetHeader(headers.ContentType, "application/json")
 
-	req.Header.Set("Authorization", identityToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	rest := httpClientAccessMgmt(stage, identityToken)
+	resp, err := rest.Do(ctx, req)
 	if err != nil {
-		return errors.Wrap(err, "client.Do failed")
+		return errors.Wrap(err, "failed to execute request")
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("Wrong status code: %q", resp.Status)
-	}
-
-	if err != nil {
-		return fmt.Errorf("failed to execute request: %w", err)
+		return errors.Errorf("wrong response status: %q", resp.Status)
 	}
 
 	return nil

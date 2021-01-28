@@ -12,11 +12,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+	dd_http "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
+
 	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
 	http_model "github.com/SKF/go-utility/http-model"
 	"github.com/SKF/go-utility/log"
-	"github.com/pkg/errors"
-	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 func (api *BaseFeature) CreatePathRequest(method, path string) error {
@@ -140,21 +141,19 @@ func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Conte
 		bodyBuffer = bytes.NewBuffer(payload)
 	}
 
-	req, err := http.NewRequest(api.Request.Method, api.Request.Url, bodyBuffer)
+	req, err := http.NewRequestWithContext(ctx, api.Request.Method, api.Request.Url, bodyBuffer)
 	if err != nil {
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
-	req = req.WithContext(ctx)
-	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
-		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
-			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
-		}
-	}
-
 	req.Header = api.Request.Headers
 
 	api.Request.ExecutionTime = time.Now()
-	client := &http.Client{}
+	client := dd_http.WrapClient(
+		&http.Client{},
+		dd_http.RTWithResourceNamer(func(req *http.Request) string {
+			return fmt.Sprintf("%s %s", req.Method, req.URL.String())
+		}),
+	)
 
 	resp, err := client.Do(req)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	dd_http "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
 )
 
 type HttpClient struct {
@@ -36,8 +36,6 @@ func (c *HttpClient) FetchToken(stage, username, password string) error {
 }
 
 func (c *HttpClient) FetchTokenWithContext(ctx context.Context, stage, username, password string) error {
-	client := &http.Client{}
-
 	in := struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -59,19 +57,19 @@ func (c *HttpClient) FetchTokenWithContext(ctx context.Context, stage, username,
 		return errors.Wrapf(err, "Failed marshal body for POST request to endpoint: %s", url)
 	}
 
-	req, err := http.NewRequest("POST", url, bs)
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bs)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to create POST request to endpoint: %s", url)
 	}
-	req = req.WithContext(ctx)
-	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
-		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
-			return errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
-		}
-	}
-
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("content-type", "application/json")
+
+	client := dd_http.WrapClient(
+		&http.Client{},
+		dd_http.RTWithResourceNamer(func(req *http.Request) string {
+			return fmt.Sprintf("%s %s", req.Method, req.URL.String())
+		}),
+	)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -120,8 +118,6 @@ func (c *HttpClient) DeleteWithContext(ctx context.Context, url string, out inte
 }
 
 func (c *HttpClient) send(ctx context.Context, method, url string, in interface{}, out interface{}) (*HttpResponse, error) {
-	client := &http.Client{}
-
 	bs := new(bytes.Buffer)
 	sendBody := in != nil && (method == "POST" || method == "PUT")
 
@@ -131,23 +127,23 @@ func (c *HttpClient) send(ctx context.Context, method, url string, in interface{
 		}
 	}
 
-	req, err := http.NewRequest(method, url, bs)
+	req, err := http.NewRequestWithContext(ctx, method, url, bs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed to create %s request to endpoint: %s", method, url)
 	}
-	req = req.WithContext(ctx)
-	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
-		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
-			return nil, errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
-		}
-	}
-
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("authorization", c.token)
+
 	if sendBody {
 		req.Header.Set("content-type", "application/json")
 	}
 
+	client := dd_http.WrapClient(
+		&http.Client{},
+		dd_http.RTWithResourceNamer(func(req *http.Request) string {
+			return fmt.Sprintf("%s %s", req.Method, req.URL.String())
+		}),
+	)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, errors.Wrapf(err, "%s request to endpoint: %s failed", method, url)

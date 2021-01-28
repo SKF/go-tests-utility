@@ -3,13 +3,15 @@ module github.com/SKF/go-tests-utility
 go 1.15
 
 require (
+	github.com/SKF/go-rest-utility v0.3.2-0.20210128080613-4e4563b21d6e
 	github.com/SKF/go-utility v1.10.4
-	github.com/SKF/go-utility/v2 v2.9.1
+	github.com/SKF/go-utility/v2 v2.12.0
+	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.6.1
 	github.com/tsenart/vegeta/v12 v12.8.4
-	gopkg.in/DataDog/dd-trace-go.v1 v1.16.1
+	gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
 	gopkg.in/go-playground/assert.v1 v1.2.1
 )

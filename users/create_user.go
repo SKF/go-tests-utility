@@ -1,28 +1,34 @@
 package users
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 	"time"
 
 	"github.com/pkg/errors"
 
+	"github.com/SKF/go-rest-utility/client"
+	"github.com/SKF/go-rest-utility/client/auth"
 	disposable_emails "github.com/SKF/go-tests-utility/disposable-emails"
-	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 const identityMgmtBaseURL = "https://sso-api.%s.users.enlight.skf.com"
 
-func Create(accessToken, stage, companyID, email string) (User, string, error) {
-	return CreateWithContext(context.Background(), accessToken, stage, companyID, email)
+func httpClientIdentityMgmt(stage, identityToken string) *client.Client {
+	return client.NewClient(
+		client.WithBaseURL(fmt.Sprintf(identityMgmtBaseURL, stage)),
+		client.WithDatadogTracing(),
+		client.WithTokenProvider(auth.RawToken(identityToken)),
+	)
 }
 
-func CreateWithContext(ctx context.Context, accessToken, stage, companyID, email string) (_ User, password string, err error) {
+func Create(identityToken, stage, companyID, email string) (User, string, error) {
+	return CreateWithContext(context.Background(), identityToken, stage, companyID, email)
+}
+
+func CreateWithContext(ctx context.Context, identityToken, stage, companyID, email string) (_ User, password string, err error) {
 	startedAt := time.Now().Add(-1 * time.Second)
 
 	requestBody := struct {
@@ -35,40 +41,14 @@ func CreateWithContext(ctx context.Context, accessToken, stage, companyID, email
 		Surname:   "Bar",
 	}
 
-	jsonBody, err := json.Marshal(requestBody)
-	if err != nil {
-		err = errors.Wrap(err, "json.Marshal failed")
-		return
-	}
+	req := client.Post("/companies/{companyId}/users").
+		Assign("companyId", companyID).
+		WithJSONPayload(requestBody)
 
-	url := fmt.Sprintf(identityMgmtBaseURL+"/companies/%s/users", stage, companyID)
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonBody))
+	rest := httpClientIdentityMgmt(stage, identityToken)
+	resp, err := rest.Do(ctx, req)
 	if err != nil {
-		err = errors.Wrap(err, "http.NewRequest failed")
-		return
-	}
-	req = req.WithContext(ctx)
-	if span, ok := dd_tracer.SpanFromContext(ctx); ok {
-		if err = dd_tracer.Inject(span.Context(), dd_tracer.HTTPHeadersCarrier(req.Header)); err != nil {
-			err = errors.Wrapf(err, "ddtracer.Inject: failed to inject trace headers")
-			return
-		}
-	}
-
-	req.Header.Set("Authorization", accessToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		err = errors.Wrap(err, "client.Do failed")
-		return
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		err = errors.Wrap(err, "ioutil.ReadAll failed")
+		err = errors.Wrap(err, "failed to execute request")
 		return
 	}
 
@@ -76,13 +56,13 @@ func CreateWithContext(ctx context.Context, accessToken, stage, companyID, email
 		Data User `json:"data"`
 	}
 
-	if err = json.Unmarshal(body, &respBody); err != nil {
-		err = errors.Wrapf(err, "json.Unmarshal failed, body: %s", string(body))
+	if err = resp.Unmarshal(&respBody); err != nil {
+		err = errors.Wrap(err, "failed to unmarshal response")
 		return
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.Errorf("Wrong status: %q, req: %+v", resp.Status, req)
+		err = errors.Errorf("wrong response status: %q", resp.Status)
 		return
 	}
 
