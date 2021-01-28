@@ -68,7 +68,7 @@ func (f *myFeature) addToCart(item string) error {
 }
 
 func (f *myFeature) checkout() error {
-    // Here the ctx can be reached from f.ctx and used to pass it forward
+    // Here the ctx can be reached from f.ctx and used by passing it forward to other services
     // or add additional information to its span
 
     tracecontext.SetTag(f.ctx, "count", len(f.items))
