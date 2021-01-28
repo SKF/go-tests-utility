@@ -7,8 +7,8 @@ github.com/DataDog/datadog-go v3.5.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20190726131236-c7b72e836616/go.mod h1:gMGUEe16aZh0QN941HgDjwrdjU4iTthPoz2/AtDRADE=
 github.com/DataDog/opencensus-go-exporter-datadog v0.0.0-20200406135749-5c268882acf0/go.mod h1:/VV3EFO/hTNQZHAqaj+CPGy2+ioFrP4EX3iRwozubhQ=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/SKF/go-rest-utility v0.3.2-0.20210128080613-4e4563b21d6e h1:OUJk3U+xjtkqccZvl5QixYi1xIfMVB3d1VTwTzRThsE=
-github.com/SKF/go-rest-utility v0.3.2-0.20210128080613-4e4563b21d6e/go.mod h1:h8g/3fX46d6omkbY8vgwUITXFLzh44S3GZX4jGfqMKQ=
+github.com/SKF/go-rest-utility v0.4.0 h1:ffqndDER3KYkXEs03o7eYvrtcg55OS1mG0GtD5OJymA=
+github.com/SKF/go-rest-utility v0.4.0/go.mod h1:h8g/3fX46d6omkbY8vgwUITXFLzh44S3GZX4jGfqMKQ=
 github.com/SKF/go-utility v1.10.4 h1:/ANSV7G7cRgnjdrdMhsSY7Z5eoJibSihMBO0YQDS1ag=
 github.com/SKF/go-utility v1.10.4/go.mod h1:7gG7T9bnq8N3YViQfefxrpz/OAoME99oDkpGc/wkwhk=
 github.com/SKF/go-utility/v2 v2.2.2/go.mod h1:58mYgUJwysqzdcAploXrLQpyjJSsfTjD2C3kzk6pcuQ=

@@ -3,7 +3,7 @@ module github.com/SKF/go-tests-utility
 go 1.15
 
 require (
-	github.com/SKF/go-rest-utility v0.3.2-0.20210128080613-4e4563b21d6e
+	github.com/SKF/go-rest-utility v0.4.0
 	github.com/SKF/go-utility v1.10.4
 	github.com/SKF/go-utility/v2 v2.12.0
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
