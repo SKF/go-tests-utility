@@ -81,7 +81,7 @@ func (tc *traceCtx) beforeStep(s *godog.Step) {
 		return
 	}
 
-	tc.rootSpan, tc.Context = dd_tracer.StartSpanFromContext(tc.rootContext, stepOperationName,
+	tc.stepSpan, tc.Context = dd_tracer.StartSpanFromContext(tc.rootContext, stepOperationName,
 		dd_tracer.SpanType(spanType),
 	)
 
