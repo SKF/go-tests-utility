@@ -30,6 +30,7 @@ type GodogScenarioContext interface {
 
 type traceCtx struct {
 	context.Context
+	rootContext context.Context
 
 	rootSpan dd_tracer.Span
 	stepSpan dd_tracer.Span
@@ -59,6 +60,7 @@ func (tc *traceCtx) beforeScenario(s *godog.Scenario) {
 	tc.rootSpan, tc.Context = dd_tracer.StartSpanFromContext(tc.Context, testOperationName,
 		dd_tracer.SpanType(spanType),
 	)
+	tc.rootContext = tc.Context
 
 	tc.rootSpan.SetTag(dd_ext.ResourceName, s.Name)
 	tc.rootSpan.SetTag(tagTestID, s.Id)
@@ -79,14 +81,12 @@ func (tc *traceCtx) beforeStep(s *godog.Step) {
 		return
 	}
 
-	tc.stepSpan = dd_tracer.StartSpan(stepOperationName,
+	tc.stepSpan, tc.Context = dd_tracer.StartSpanFromContext(tc.rootContext, stepOperationName,
 		dd_tracer.SpanType(spanType),
-		dd_tracer.ChildOf(tc.rootSpan.Context()),
 	)
 
 	tc.stepSpan.SetTag(dd_ext.ResourceName, s.Text)
 	tc.stepSpan.SetTag(tagStepID, s.Id)
-	tc.Context = dd_tracer.ContextWithSpan(tc.Context, tc.stepSpan)
 }
 
 func (tc *traceCtx) afterStep(s *godog.Step, err error) {
@@ -95,6 +95,7 @@ func (tc *traceCtx) afterStep(s *godog.Step, err error) {
 	}
 
 	tc.stepSpan.Finish(dd_tracer.WithError(err))
+	tc.Context = tc.rootContext
 }
 
 func (tc *traceCtx) SetTag(key string, value interface{}) {
