@@ -50,3 +50,31 @@ func AddUserAccessWithContext(ctx context.Context, identityToken, stage, userID,
 
 	return nil
 }
+
+func RemoveUserAccess(identityToken, stage, userID, nodeID string) error {
+	return RemoveUserAccessWithContext(context.Background(), identityToken, stage, userID, nodeID)
+}
+
+func RemoveUserAccessWithContext(ctx context.Context, identityToken, stage, userID, nodeID string) (err error) {
+	log.Debugf("Removing access %s - %s", userID, nodeID)
+	if !uuid.IsValid(userID) {
+		return fmt.Errorf("Invalid User ID: %q", userID)
+	}
+
+	req := client.Delete("/users/{userId}/hierarchies/{nodeId}").
+		Assign("userId", userID).
+		Assign("nodeId", nodeID).
+		SetHeader(headers.ContentType, "application/json")
+
+	restClient := httpClientAccessMgmt(stage, identityToken)
+	resp, err := restClient.Do(ctx, req)
+	if err != nil {
+		return errors.Wrap(err, "failed to execute request")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.Errorf("wrong response status: %q", resp.Status)
+	}
+
+	return nil
+}

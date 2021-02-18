@@ -24,6 +24,34 @@ func AddUserRoleWithContext(ctx context.Context, identityToken, stage, userID, r
 	return updateUser(ctx, identityToken, stage, user)
 }
 
+func RemoveUserRole(identityToken, stage, userID, role string) error {
+	return RemoveUserRoleWithContext(context.Background(), identityToken, stage, userID, role)
+}
+
+func RemoveUserRoleWithContext(ctx context.Context, identityToken, stage, userID, roleToBeRemoved string) (err error) {
+	user, err := getUser(ctx, identityToken, stage, userID)
+	if err != nil {
+		return
+	}
+
+	var newUserRoles = make([]string, 0, len(user.UserRoles))
+	for _, role := range user.UserRoles {
+		if role == roleToBeRemoved {
+			continue
+		}
+
+		newUserRoles = append(newUserRoles, role)
+	}
+
+	if len(newUserRoles) == len(user.UserRoles) {
+		// Nothing to update
+		return
+	}
+
+	user.UserRoles = newUserRoles
+	return updateUser(ctx, identityToken, stage, user)
+}
+
 func getUser(ctx context.Context, identityToken, stage, userID string) (user user, err error) {
 	if userID == "" {
 		return user, fmt.Errorf("userID is required")
