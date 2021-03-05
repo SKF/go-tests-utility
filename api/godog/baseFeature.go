@@ -27,7 +27,7 @@ type Request struct {
 	ExecutionTime time.Time
 }
 
-func (r * Request) String() string{
+func (r *Request) String() string{
 	return fmt.Sprintf("%s :: %s headers: %s time: %v\n %s", r.Method, r.Url, r.Headers, r.ExecutionTime, r.Body)
 }
 

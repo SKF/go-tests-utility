@@ -24,7 +24,6 @@ func TestBaseFeature_assertEquals(t *testing.T) {
 		}
 	}
 
-
 	assert.NoError(t, state.AssertEquals("apa", "apa2"))
 
 	assert.Error(t, state.AssertEquals("apa", "bepa"))
