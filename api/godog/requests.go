@@ -12,12 +12,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-	dd_http "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
-
 	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
+
 	http_model "github.com/SKF/go-utility/http-model"
 	"github.com/SKF/go-utility/log"
+	"github.com/pkg/errors"
+
+	dd_http "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
 )
 
 func (api *BaseFeature) CreatePathRequest(method, path string) error {
@@ -133,8 +134,7 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) error {
 }
 
 func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Context, payload []byte) (err error) {
-	log.Debugf("Request %s: %s\n", api.Request.Method, payload)
-	log.Debugf("req headers: %v\n", api.Request.Headers)
+	log.Debugf("Request:  %s\n", api.Request.String())
 
 	var bodyBuffer io.Reader
 	if payload != nil {
@@ -227,7 +227,11 @@ func (api *BaseFeature) AssertDataLength(expected string) error {
 
 func (api *BaseFeature) AssertResponseCode(code int) (err error) {
 	if api.Response.Raw.StatusCode != code {
-		err = errors.Errorf("expected status code: %d, got: %d \n response: %s, request: %+v", code, api.Response.Raw.StatusCode, string(api.Response.Body), api.Request)
+		err = errors.Errorf(`
+            expected status code: %d,
+			got: %d
+			response: %s
+			request: %+v` , code, api.Response.Raw.StatusCode, string(api.Response.Body), api.Request.String())
 		return
 	}
 
