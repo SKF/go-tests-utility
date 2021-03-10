@@ -84,15 +84,18 @@ func (api *BaseFeature) SetRequestBodyParameterTo(key, value string) (err error)
 
 func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr string) (err error) {
 	values := strings.Split(valuesstr, ",")
-	list := make([]string, len(values))
-	for i, value := range values {
+	list := make([]string, 0, len(values))
+	for _, value := range values {
 		value = strings.TrimSpace(value)
 		if strings.HasPrefix(value, ".") {
 			if value, err = api.GetValue(value); err != nil {
 				return err
 			}
 		}
-		list[i] = value
+
+		if len(value) > 0 {
+			list = append(list, value)
+		}
 	}
 
 	keyParts := strings.Split(key, ".")
@@ -135,6 +138,10 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) error {
 
 func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Context, payload []byte) (err error) {
 	log.Debugf("Request:  %s\n", api.Request.String())
+
+	if len(payload) > 0 {
+		log.Debugf("Payload: %s\n", payload)
+	}
 
 	var bodyBuffer io.Reader
 	if payload != nil {
