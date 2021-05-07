@@ -18,7 +18,7 @@ import (
 
 const disposableEmailsBaseURL = "https://api.disposable-emails.enlight.skf.com"
 
-func NewEmailWithPrefix(prefix string) (_ string, err error){
+func NewEmailWithPrefix(prefix string) (_ string, err error) {
 	prefix = strings.ToLower(prefix)
 
 	url := fmt.Sprintf("%s/email-addresses/new?prefix=%s", disposableEmailsBaseURL, prefix)

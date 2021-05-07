@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gopkg.in/go-playground/assert.v1"
 )
 
 func TestMatcherSmoke(t *testing.T) {
@@ -117,4 +116,17 @@ func TestReadStringArr(t *testing.T) {
 
 	_, err = ReadStringArr([]byte(`["apa", {"a":1}]`), "")
 	require.NotNil(t, err)
+}
+
+func TestKeyIsMissing(t *testing.T) {
+	require.NoError(t, KeyIsMissing([]byte(`{}`), "a"))
+
+	require.Error(t, KeyIsMissing([]byte(`{"a":1}`), "a"))
+	require.Error(t, KeyIsMissing([]byte(`{"a":1}`), ".a"))
+
+	require.Error(t, KeyIsMissing([]byte(`{"a": { "b": "test"} }`), ".a.b"))
+	require.NoError(t, KeyIsMissing([]byte(`{"a": { "b": "test"} }`), "a.c"))
+
+	require.NoError(t, KeyIsMissing([]byte(` null  `), ""))
+
 }

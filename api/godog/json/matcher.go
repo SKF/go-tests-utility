@@ -25,7 +25,7 @@ func MatchNull(json []byte, path string) error {
 	return errors.Errorf("Match error: Expected null got '%s' JSON: %s", result.String(), string(json))
 }
 
-func MissingKey(json []byte, path string) error {
+func KeyIsMissing(json []byte, path string) error {
 	if bytes.Equal(bytes.TrimSpace(json), []byte("null")) && (path == "" || path == ".") {
 		return nil
 	}
