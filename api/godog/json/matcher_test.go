@@ -106,7 +106,6 @@ func TestReadStringArr(t *testing.T) {
 	require.Nil(t, err)
 	assert.Equal(t, []string{"apa", ""}, result)
 
-
 	_, err = ReadStringArr([]byte(`{"key" : "value" }`), ".key")
 	require.NotNil(t, err)
 
