@@ -18,10 +18,6 @@ linters-settings:
   govet:
     # report about shadowed variables
     check-shadowing: true
-  goimports:
-    # put imports beginning with prefix after 3rd-party packages;
-    # it's a comma-separated list of prefixes
-    local-prefixes: dev.azure.com/skfdc/REP-SW/asset-components
   gocyclo:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 20
