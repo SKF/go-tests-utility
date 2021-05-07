@@ -238,7 +238,7 @@ func (api *BaseFeature) AssertResponseCode(code int) (err error) {
             expected status code: %d,
 			got: %d
 			response: %s
-			request: %+v` , code, api.Response.Raw.StatusCode, string(api.Response.Body), api.Request.String())
+			request: %+v`, code, api.Response.Raw.StatusCode, string(api.Response.Body), api.Request.String())
 		return
 	}
 

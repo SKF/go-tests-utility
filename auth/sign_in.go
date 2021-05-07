@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+
 	"github.com/SKF/go-utility/v2/auth"
 	"github.com/SKF/go-utility/v2/auth/cachedauth"
 )
@@ -19,7 +20,7 @@ func SignIn(stage, username, password string) (tokens Tokens, err error) {
 	err = cachedauth.SignIn(context.Background(), username, password)
 
 	if err != nil {
-		err = fmt.Errorf("failed to signin: %w",err)
+		err = fmt.Errorf("failed to signin: %w", err)
 	}
 
 	return convertTokens(cachedauth.GetTokensByUser(username)), err
@@ -33,10 +34,8 @@ func convertTokens(in auth.Tokens) Tokens {
 	}
 }
 
-
 type Tokens struct {
 	AccessToken   string `json:"accessToken"`
 	IdentityToken string `json:"identityToken"`
 	RefreshToken  string `json:"refreshToken"`
 }
-

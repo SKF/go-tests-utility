@@ -13,6 +13,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.6.1
 	github.com/tsenart/vegeta/v12 v12.8.4
+	golang.org/x/tools v0.1.0 // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
 	gopkg.in/go-playground/assert.v1 v1.2.1
 )

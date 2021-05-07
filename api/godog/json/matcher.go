@@ -2,10 +2,11 @@ package json
 
 import (
 	"bytes"
-	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 	"regexp"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 )
 
 func MatchNull(json []byte, path string) error {
@@ -15,9 +16,25 @@ func MatchNull(json []byte, path string) error {
 
 	path = revertLegacySyntax(path)
 
-	result := gjson.Get(string(json), path)
+	result := gjson.GetBytes(json, path)
 
 	if result.Exists() && !result.IsArray() && !result.IsObject() && result.Value() == nil {
+		return nil
+	}
+
+	return errors.Errorf("Match error: Expected null got '%s' JSON: %s", result.String(), string(json))
+}
+
+func KeyIsMissing(json []byte, path string) error {
+	if bytes.Equal(bytes.TrimSpace(json), []byte("null")) && (path == "" || path == ".") {
+		return nil
+	}
+
+	path = revertLegacySyntax(path)
+
+	result := gjson.GetBytes(json, path)
+
+	if !result.Exists() {
 		return nil
 	}
 
@@ -32,7 +49,7 @@ func Match(json []byte, path string, pattern string) error {
 
 	path = revertLegacySyntax(path)
 
-	result := gjson.Get(string(json), path)
+	result := gjson.GetBytes(json, path)
 
 	if !re.MatchString(result.String()) {
 		return errors.Errorf("Match error: Values mismatch, pattern: '%s' value: '%s' JSON: %s", pattern, result.String(), string(json))
@@ -41,12 +58,10 @@ func Match(json []byte, path string, pattern string) error {
 	return nil
 }
 
-
 func ArrayLen(json []byte, path string, length int) error {
 	path = revertLegacySyntax(path)
 
-	res := gjson.Get(string(json), path)
-
+	res := gjson.GetBytes(json, path)
 
 	if !res.IsArray() {
 		return errors.Errorf("Match error: Expected an array got: %s, JSON: %s", res.String(), string(json))
@@ -62,7 +77,7 @@ func ArrayLen(json []byte, path string, length int) error {
 func Read(json []byte, path string) (result string, err error) {
 	path = revertLegacySyntax(path)
 
-	res := gjson.Get(string(json), path)
+	res := gjson.GetBytes(json, path)
 
 	if !res.Exists() || res.IsObject() || res.IsArray() {
 		return "", errors.Errorf("Match error: Expected a scalar got '%s' JSON: %s", res.String(), string(json))
@@ -74,9 +89,7 @@ func Read(json []byte, path string) (result string, err error) {
 func ReadStringArr(json []byte, path string) (result []string, err error) {
 	path = revertLegacySyntax(path)
 
-	res := gjson.Get(string(json), path)
-
-
+	res := gjson.GetBytes(json, path)
 
 	if !res.IsArray() {
 		return []string{}, errors.Errorf("Match error: Expected an array got: %s", res.String())
@@ -87,6 +100,7 @@ func ReadStringArr(json []byte, path string) (result []string, err error) {
 		if !isScalar(v) {
 			return []string{}, errors.Errorf("Match error: Expected a scalar got: %s", stringValue)
 		}
+
 		result = append(result, stringValue)
 	}
 

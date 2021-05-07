@@ -2,9 +2,10 @@ package godog
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestBaseFeature_SetRequestBodyStringListParameterTo(t *testing.T) {

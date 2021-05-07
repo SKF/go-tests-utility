@@ -11,6 +11,7 @@ import (
 
 	"github.com/SKF/go-rest-utility/client"
 	"github.com/SKF/go-rest-utility/client/auth"
+
 	disposable_emails "github.com/SKF/go-tests-utility/disposable-emails"
 )
 
