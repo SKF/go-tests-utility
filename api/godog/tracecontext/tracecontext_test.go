@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/cucumber/godog"
+	"github.com/cucumber/messages-go/v10"
 	"github.com/stretchr/testify/assert"
 	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 
