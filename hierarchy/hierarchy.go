@@ -43,12 +43,17 @@ func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, 
 		Description string `json:"description"`
 		Type        string `json:"nodeType"`
 		SubType     string `json:"nodeSubType"`
+		Criticality string `json:"criticality"`
 	}{
 		ParentID:    parentNodeID,
 		Label:       label,
 		Description: description,
 		Type:        nodetype,
 		SubType:     subtype,
+	}
+
+	if requestBody.Type == "asset" {
+		requestBody.Criticality = "criticality_b"
 	}
 
 	req := client.Post("/nodes").
