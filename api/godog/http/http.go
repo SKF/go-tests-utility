@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -77,8 +78,13 @@ func (c *HttpClient) FetchTokenWithContext(ctx context.Context, stage, username,
 	}
 
 	defer resp.Body.Close()
-	if err = json.NewDecoder(resp.Body).Decode(out); err != nil {
-		return errors.Wrapf(err, "Failed to unmarshal json response from POST request to endpoint: %s", url)
+	bodybytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if err = json.Unmarshal(bodybytes, out); err != nil {
+		return errors.Wrapf(err, "Failed to unmarshal json response from POST request to endpoint: %s, body: '%s'", url, bodybytes)
 	}
 
 	c.token = out.Token
@@ -156,7 +162,7 @@ func (c *HttpClient) send(ctx context.Context, method, url string, in interface{
 
 	if out != nil {
 		if err = json.Unmarshal(r.Body, out); err != nil {
-			return nil, errors.Wrapf(err, "Failed to unmarshal json response from %s request to endpoint: %s", method, url)
+			return nil, errors.Wrapf(err, "Failed to unmarshal json response from %s request to endpoint: %s, Body: '%s'", method, url, r.Body)
 		}
 	}
 
