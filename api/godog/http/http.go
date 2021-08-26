@@ -124,7 +124,6 @@ func (c *HttpClient) DeleteWithContext(ctx context.Context, url string, out inte
 }
 
 func (c *HttpClient) send(ctx context.Context, method, url string, in interface{}, out interface{}) (*HttpResponse, error) {
-	fmt.Printf("sending")
 	bs := new(bytes.Buffer)
 	sendBody := in != nil && (method == "POST" || method == "PUT")
 
