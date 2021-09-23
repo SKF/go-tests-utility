@@ -82,6 +82,26 @@ func (api *BaseFeature) SetRequestBodyParameterTo(key, value string) (err error)
 	return
 }
 
+func (api *BaseFeature) SetRequestBodyParameterToInt(key string, value int) (err error) {
+	prevMap := api.Request.Body
+
+	keyParts := strings.Split(key, ".")
+	for idx, key := range keyParts {
+		if len(keyParts) == idx+1 {
+			prevMap[key] = value
+			break
+		}
+
+		if _, exists := prevMap[key]; !exists {
+			prevMap[key] = make(map[string]interface{})
+		}
+
+		prevMap = prevMap[key].(map[string]interface{})
+	}
+
+	return
+}
+
 func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr string) (err error) {
 	values := strings.Split(valuesstr, ",")
 	list := make([]string, 0, len(values))
