@@ -8,13 +8,11 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
-	"github.com/tidwall/gjson"
 
 	http_model "github.com/SKF/go-utility/http-model"
 	"github.com/SKF/go-utility/log"
@@ -212,22 +210,7 @@ func (api *BaseFeature) ExecuteInvalidRequestWithContext(ctx context.Context) er
 }
 
 func (api *BaseFeature) AssertMissing(responseKey string) error {
-	bracketRegexp := regexp.MustCompile(`\.?\[(\d+)]`)
-	path := bracketRegexp.ReplaceAllString(responseKey, ".$1")
-
-	path = strings.TrimPrefix(path, ".")
-
-	if path == "" {
-		path = "@this"
-	}
-
-	res := gjson.GetBytes(api.Response.Body, path)
-
-	if res.Exists() {
-		return errors.New(fmt.Sprintf("value wasn't missing for: %v", path))
-	}
-
-	return nil
+	return json_matcher.KeyIsMissing(api.Response.Body, responseKey)
 }
 
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
