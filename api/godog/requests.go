@@ -215,7 +215,7 @@ func (api *BaseFeature) AssertMissing(responseKey string) error {
 		return nil
 	}
 
-	return errors.New(fmt.Sprintf("Value wasn't mising for: %v", responseKey))
+	return errors.New(fmt.Sprintf("value wasn't missing for: %v", responseKey))
 }
 
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
