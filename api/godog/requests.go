@@ -209,6 +209,10 @@ func (api *BaseFeature) ExecuteInvalidRequestWithContext(ctx context.Context) er
 	return api.ExecuteTheRequestWithPayloadAndContext(ctx, invalidBody)
 }
 
+func (api *BaseFeature) AssertMissing(responseKey string) error {
+	return json_matcher.KeyIsMissing(api.Response.Body, responseKey)
+}
+
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
 	value, err := json_matcher.Read(api.Response.Body, responseKey)
 	if err != nil {
