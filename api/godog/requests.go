@@ -209,6 +209,15 @@ func (api *BaseFeature) ExecuteInvalidRequestWithContext(ctx context.Context) er
 	return api.ExecuteTheRequestWithPayloadAndContext(ctx, invalidBody)
 }
 
+func (api *BaseFeature) AssertEmpty(responseKey string) error {
+	value, err := json_matcher.Read(api.Response.Body, responseKey)
+	if err != nil || value == "" {
+		return nil
+	}
+
+	return errors.New(fmt.Sprintf("Value wasn't empty for: %v", responseKey))
+}
+
 func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
 	value, err := json_matcher.Read(api.Response.Body, responseKey)
 	if err != nil {
