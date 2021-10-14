@@ -18,7 +18,7 @@ type Until struct {
 
 func Try(function func() (bool, error), timeout time.Duration) error {
 	nrOfRetries := 0
-	timeSlept := time.Duration(0)
+	endBefore := time.Now().Add(timeout)
 
 	for {
 		success, err := function()
@@ -31,9 +31,9 @@ func Try(function func() (bool, error), timeout time.Duration) error {
 		}
 
 		sleepDuration := time.Duration(math.Pow(powBase, float64(nrOfRetries))*startingMillisToWait) * time.Millisecond
+		nextRuntime := time.Now().Add(sleepDuration)
 
-		timeSlept += sleepDuration
-		if timeSlept > timeout {
+		if nextRuntime.After(endBefore) {
 			break
 		}
 

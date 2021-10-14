@@ -28,27 +28,27 @@ func Test_Retries(t *testing.T) {
 		shouldFail        bool
 	}{
 		{
-			name:              "timeout before success",
+			name:              "success after timeout window",
 			nrOfRetriesNeeded: 2,
-			retryTimeout:      100 * time.Millisecond,
+			retryTimeout:      200 * time.Millisecond,
 			shouldFail:        true,
 		},
 		{
 			name:              "success within timeout window",
 			nrOfRetriesNeeded: 1,
-			retryTimeout:      100 * time.Millisecond,
+			retryTimeout:      200 * time.Millisecond,
 			shouldFail:        false,
 		},
 		{
-			name:              "sleep for 700 ms (next sleep will be 800 ms), total 1500",
+			name:              "exponential backoff, success after timeout window",
 			nrOfRetriesNeeded: 4,
-			retryTimeout:      1499 * time.Millisecond,
+			retryTimeout:      1450 * time.Millisecond, // sleep for 700 ms (next sleep will be 800 ms), total 1500
 			shouldFail:        true,
 		},
 		{
-			name:              "sleep for 700 ms (next sleep will be 800 ms), total 1500",
-			nrOfRetriesNeeded: 4,
-			retryTimeout:      1500 * time.Millisecond,
+			name:              "exponential backoff, success within timeout window",
+			nrOfRetriesNeeded: 3,
+			retryTimeout:      1450 * time.Millisecond, // sleep for 700 ms (next sleep will be 800 ms), total 1500
 			shouldFail:        false,
 		},
 	}
