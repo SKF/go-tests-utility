@@ -229,8 +229,8 @@ func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Conte
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
 
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Wrap(err, "ioutil.ReadAll failed")
 	}
