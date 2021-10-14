@@ -6,13 +6,21 @@ import (
 	"time"
 )
 
+const (
+	startingMillisToWait = 100
+	powBase              = 2
+)
+
 type Until struct {
 	Condition func(body []byte) bool
 	Timeout   time.Duration
 }
 
 func Try(function func() (bool, error), timeout time.Duration) error {
-	for i := 0; i < int(timeout.Milliseconds()); i++ {
+	nrOfRetries := 0
+	timeSlept := time.Duration(0)
+
+	for {
 		success, err := function()
 		if err != nil {
 			return err
@@ -22,13 +30,16 @@ func Try(function func() (bool, error), timeout time.Duration) error {
 			return nil
 		}
 
-		sleepDuration := time.Duration(math.Pow(2, float64(i))*100) * time.Millisecond // nolint: gomnd
-		if sleepDuration > timeout {
+		sleepDuration := time.Duration(math.Pow(powBase, float64(nrOfRetries))*startingMillisToWait) * time.Millisecond
+
+		timeSlept += sleepDuration
+		if timeSlept > timeout {
 			break
 		}
 
 		time.Sleep(sleepDuration)
+		nrOfRetries++
 	}
 
-	return fmt.Errorf("timeout reached before condition was met")
+	return fmt.Errorf("timeout <%s> reached before condition was met, #retries = %d", timeout, nrOfRetries)
 }

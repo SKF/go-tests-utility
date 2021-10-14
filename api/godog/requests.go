@@ -145,16 +145,16 @@ func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr strin
 }
 
 func (api *BaseFeature) ExecuteTheRequestUntil(until retry.Until) error {
-	return api.ExecuteTheRequestWithContextUntil(context.Background(), until)
+	return api.ExecuteTheRequestUntilWithContext(context.Background(), until)
 }
 
 func (api *BaseFeature) ExecuteTheRequest() error {
 	return api.ExecuteTheRequestWithContext(context.Background())
 }
 
-func (api *BaseFeature) ExecuteTheRequestWithContextUntil(ctx context.Context, until retry.Until) (err error) {
+func (api *BaseFeature) ExecuteTheRequestUntilWithContext(ctx context.Context, until retry.Until) (err error) {
 	if api.Request.Method == http.MethodGet {
-		return api.ExecuteTheRequestWithPayloadAndContextUntil(ctx, nil, until)
+		return api.ExecuteTheRequestUntilWithPayloadAndContext(ctx, nil, until)
 	}
 
 	jsonBody, err := json.Marshal(api.Request.Body)
@@ -162,7 +162,7 @@ func (api *BaseFeature) ExecuteTheRequestWithContextUntil(ctx context.Context, u
 		return errors.Wrap(err, "json.Marshal failed")
 	}
 
-	return api.ExecuteTheRequestWithPayloadAndContextUntil(ctx, jsonBody, until)
+	return api.ExecuteTheRequestUntilWithPayloadAndContext(ctx, jsonBody, until)
 }
 
 func (api *BaseFeature) ExecuteTheRequestWithContext(ctx context.Context) (err error) {
@@ -178,60 +178,21 @@ func (api *BaseFeature) ExecuteTheRequestWithContext(ctx context.Context) (err e
 	return api.ExecuteTheRequestWithPayloadAndContext(ctx, jsonBody)
 }
 
-func (api *BaseFeature) ExecuteTheRequestWithPayloadUntil(payload []byte, until retry.Until) error {
-	return api.ExecuteTheRequestWithPayloadAndContextUntil(context.Background(), payload, until)
+func (api *BaseFeature) ExecuteTheRequestUntilWithPayload(payload []byte, until retry.Until) error {
+	return api.ExecuteTheRequestUntilWithPayloadAndContext(context.Background(), payload, until)
 }
 
 func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) error {
 	return api.ExecuteTheRequestWithPayloadAndContext(context.Background(), payload)
 }
 
-func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContextUntil(ctx context.Context, payload []byte, until retry.Until) (err error) {
-	log.Debugf("Request:  %s\n", api.Request.String())
-
-	if len(payload) > 0 {
-		log.Debugf("Payload: %s\n", payload)
-	}
-
-	var bodyBuffer io.Reader
-	if payload != nil {
-		bodyBuffer = bytes.NewBuffer(payload)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, api.Request.Method, api.Request.Url, bodyBuffer)
-	if err != nil {
-		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
-	}
-
-	req.Header = api.Request.Headers
-
-	api.Request.ExecutionTime = time.Now()
-	client := dd_http.WrapClient(
-		&http.Client{},
-		dd_http.RTWithResourceNamer(func(req *http.Request) string {
-			return fmt.Sprintf("%s %s", req.Method, req.URL.String())
-		}),
-	)
-
+func (api *BaseFeature) ExecuteTheRequestUntilWithPayloadAndContext(ctx context.Context, payload []byte, until retry.Until) (err error) {
 	return retry.Try(func() (bool, error) {
-		resp, err := client.Do(req)
-		if err != nil {
-			return false, errors.Wrapf(err, "client.Do failed - header: `%+v`", req.Header)
+		if err := api.ExecuteTheRequestWithPayloadAndContext(ctx, payload); err != nil {
+			return false, err
 		}
 
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-
-		if err != nil {
-			return false, errors.Wrap(err, "ioutil.ReadAll failed")
-		}
-
-		api.Response.Raw = resp
-		api.Response.Body = body
-
-		log.Debugf("Response: %s", body)
-
-		return until.Condition(body), nil
+		return until.Condition(api.Response.Body), nil
 	}, until.Timeout)
 }
 
