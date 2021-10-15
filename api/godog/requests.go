@@ -13,6 +13,7 @@ import (
 	"time"
 
 	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
+	"github.com/SKF/go-tests-utility/api/godog/retry"
 
 	http_model "github.com/SKF/go-utility/http-model"
 	"github.com/SKF/go-utility/log"
@@ -28,6 +29,7 @@ func (api *BaseFeature) CreatePathRequest(method, path string) error {
 		Method:  method,
 		Url:     api.baseURL + path,
 	}
+
 	return nil
 }
 
@@ -39,6 +41,7 @@ func (api *BaseFeature) SetRequestHeaderParameterTo(key, value string) (err erro
 	}
 
 	api.Request.Headers.Add(key, value)
+
 	return
 }
 
@@ -55,6 +58,7 @@ func (api *BaseFeature) SetsRequestPathParameterTo(key, value string) (err error
 	}
 
 	api.Request.Url = strings.ReplaceAll(api.Request.Url, keyPattern, value)
+
 	return
 }
 
@@ -67,6 +71,7 @@ func (api *BaseFeature) SetRequestBodyParameterTo(key, value string) (err error)
 
 	keyParts := strings.Split(key, ".")
 	prevMap := api.Request.Body
+
 	for idx, key := range keyParts {
 		if len(keyParts) == idx+1 {
 			prevMap[key] = value
@@ -76,6 +81,7 @@ func (api *BaseFeature) SetRequestBodyParameterTo(key, value string) (err error)
 		if _, exists := prevMap[key]; !exists {
 			prevMap[key] = make(map[string]interface{})
 		}
+
 		prevMap = prevMap[key].(map[string]interface{})
 	}
 
@@ -105,6 +111,7 @@ func (api *BaseFeature) SetRequestBodyParameterToInt(key string, value int) (err
 func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr string) (err error) {
 	values := strings.Split(valuesstr, ",")
 	list := make([]string, 0, len(values))
+
 	for _, value := range values {
 		value = strings.TrimSpace(value)
 		if strings.HasPrefix(value, ".") {
@@ -120,6 +127,7 @@ func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr strin
 
 	keyParts := strings.Split(key, ".")
 	prevMap := api.Request.Body
+
 	for idx, key := range keyParts {
 		if len(keyParts) == idx+1 {
 			prevMap[key] = list
@@ -129,31 +137,63 @@ func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr strin
 		if _, exists := prevMap[key]; !exists {
 			prevMap[key] = make(map[string]interface{})
 		}
+
 		prevMap = prevMap[key].(map[string]interface{})
 	}
 
 	return
 }
 
+func (api *BaseFeature) ExecuteTheRequestUntil(until retry.Until) error {
+	return api.ExecuteTheRequestUntilWithContext(context.Background(), until)
+}
+
 func (api *BaseFeature) ExecuteTheRequest() error {
 	return api.ExecuteTheRequestWithContext(context.Background())
 }
 
-func (api *BaseFeature) ExecuteTheRequestWithContext(ctx context.Context) (err error) {
+func (api *BaseFeature) ExecuteTheRequestUntilWithContext(ctx context.Context, until retry.Until) (err error) {
+	if api.Request.Method == http.MethodGet {
+		return api.ExecuteTheRequestUntilWithPayloadAndContext(ctx, nil, until)
+	}
+
 	jsonBody, err := json.Marshal(api.Request.Body)
 	if err != nil {
 		return errors.Wrap(err, "json.Marshal failed")
 	}
 
+	return api.ExecuteTheRequestUntilWithPayloadAndContext(ctx, jsonBody, until)
+}
+
+func (api *BaseFeature) ExecuteTheRequestWithContext(ctx context.Context) (err error) {
 	if api.Request.Method == http.MethodGet {
-		jsonBody = nil
+		return api.ExecuteTheRequestWithPayloadAndContext(ctx, nil)
+	}
+
+	jsonBody, err := json.Marshal(api.Request.Body)
+	if err != nil {
+		return errors.Wrap(err, "json.Marshal failed")
 	}
 
 	return api.ExecuteTheRequestWithPayloadAndContext(ctx, jsonBody)
 }
 
+func (api *BaseFeature) ExecuteTheRequestUntilWithPayload(payload []byte, until retry.Until) error {
+	return api.ExecuteTheRequestUntilWithPayloadAndContext(context.Background(), payload, until)
+}
+
 func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) error {
 	return api.ExecuteTheRequestWithPayloadAndContext(context.Background(), payload)
+}
+
+func (api *BaseFeature) ExecuteTheRequestUntilWithPayloadAndContext(ctx context.Context, payload []byte, until retry.Until) (err error) {
+	return retry.Try(func() (bool, error) {
+		if err := api.ExecuteTheRequestWithPayloadAndContext(ctx, payload); err != nil {
+			return false, err
+		}
+
+		return until.Condition(api.Response.Body), nil
+	}, until.Timeout)
 }
 
 func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Context, payload []byte) (err error) {
@@ -172,6 +212,7 @@ func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Conte
 	if err != nil {
 		return errors.Wrapf(err, "http.NewRequest failed - Payload: `%s`", string(payload))
 	}
+
 	req.Header = api.Request.Headers
 
 	api.Request.ExecutionTime = time.Now()
@@ -188,6 +229,7 @@ func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Conte
 	}
 
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Wrap(err, "ioutil.ReadAll failed")
@@ -197,6 +239,7 @@ func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Conte
 	api.Response.Body = body
 
 	log.Debugf("Response: %s", body)
+
 	return nil
 }
 
@@ -222,6 +265,7 @@ func (api *BaseFeature) AssertNotEmpty(responseKey string) error {
 	if value == "" {
 		return errors.New(fmt.Sprintf("No value found for: %v", responseKey))
 	}
+
 	return nil
 }
 
@@ -284,9 +328,11 @@ func (api *BaseFeature) AssertResponseBodyErrorMessageIs(errorMessage string) (e
 	if err = json.Unmarshal(api.Response.Body, &responseBody); err != nil {
 		return
 	}
+
 	if responseBody.Error.Message != errorMessage {
 		err = errors.Errorf("expected error message: %s, got: %s", errorMessage, responseBody.Error.Message)
 		return
 	}
+
 	return
 }
