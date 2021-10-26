@@ -16,6 +16,11 @@ type Until struct {
 	Timeout   time.Duration
 }
 
+type UntilWithError struct {
+	Condition func(body []byte) (bool, error)
+	Timeout   time.Duration
+}
+
 func Try(function func() (bool, error), timeout time.Duration) error {
 	nrOfRetries := 0
 	endBefore := time.Now().Add(timeout)
