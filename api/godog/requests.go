@@ -145,7 +145,11 @@ func (api *BaseFeature) SetRequestBodyStringListParameterTo(key, valuesstr strin
 }
 
 func (api *BaseFeature) ExecuteTheRequestUntil(until retry.Until) error {
-	return api.ExecuteTheRequestUntilWithContext(context.Background(), until)
+	return api.ExecuteTheRequestUntilWithContextWithError(context.Background(), wrapUntilError(until))
+}
+
+func (api *BaseFeature) ExecuteTheRequestUntilWithError(until retry.UntilWithError) error {
+	return api.ExecuteTheRequestUntilWithContextWithError(context.Background(), until)
 }
 
 func (api *BaseFeature) ExecuteTheRequest() error {
@@ -154,7 +158,7 @@ func (api *BaseFeature) ExecuteTheRequest() error {
 
 func (api *BaseFeature) ExecuteTheRequestUntilWithContext(ctx context.Context, until retry.Until) (err error) {
 	if api.Request.Method == http.MethodGet {
-		return api.ExecuteTheRequestUntilWithPayloadAndContext(ctx, nil, until)
+		return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(ctx, nil, wrapUntilError(until))
 	}
 
 	jsonBody, err := json.Marshal(api.Request.Body)
@@ -162,7 +166,20 @@ func (api *BaseFeature) ExecuteTheRequestUntilWithContext(ctx context.Context, u
 		return errors.Wrap(err, "json.Marshal failed")
 	}
 
-	return api.ExecuteTheRequestUntilWithPayloadAndContext(ctx, jsonBody, until)
+	return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(ctx, jsonBody, wrapUntilError(until))
+}
+
+func (api *BaseFeature) ExecuteTheRequestUntilWithContextWithError(ctx context.Context, until retry.UntilWithError) (err error) {
+	if api.Request.Method == http.MethodGet {
+		return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(ctx, nil, until)
+	}
+
+	jsonBody, err := json.Marshal(api.Request.Body)
+	if err != nil {
+		return errors.Wrap(err, "json.Marshal failed")
+	}
+
+	return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(ctx, jsonBody, until)
 }
 
 func (api *BaseFeature) ExecuteTheRequestWithContext(ctx context.Context) (err error) {
@@ -179,7 +196,11 @@ func (api *BaseFeature) ExecuteTheRequestWithContext(ctx context.Context) (err e
 }
 
 func (api *BaseFeature) ExecuteTheRequestUntilWithPayload(payload []byte, until retry.Until) error {
-	return api.ExecuteTheRequestUntilWithPayloadAndContext(context.Background(), payload, until)
+	return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(context.Background(), payload, wrapUntilError(until))
+}
+
+func (api *BaseFeature) ExecuteTheRequestUntilWithPayloadWithError(payload []byte, until retry.UntilWithError) error {
+	return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(context.Background(), payload, until)
 }
 
 func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) error {
@@ -187,12 +208,16 @@ func (api *BaseFeature) ExecuteTheRequestWithPayload(payload []byte) error {
 }
 
 func (api *BaseFeature) ExecuteTheRequestUntilWithPayloadAndContext(ctx context.Context, payload []byte, until retry.Until) (err error) {
+	return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(ctx, payload, wrapUntilError(until))
+}
+
+func (api *BaseFeature) ExecuteTheRequestUntilWithPayloadAndContextWithError(ctx context.Context, payload []byte, until retry.UntilWithError) (err error) {
 	return retry.Try(func() (bool, error) {
 		if err := api.ExecuteTheRequestWithPayloadAndContext(ctx, payload); err != nil {
 			return false, err
 		}
 
-		return until.Condition(api.Response.Body), nil
+		return until.Condition(api.Response.Body)
 	}, until.Timeout)
 }
 
@@ -335,4 +360,13 @@ func (api *BaseFeature) AssertResponseBodyErrorMessageIs(errorMessage string) (e
 	}
 
 	return
+}
+
+func wrapUntilError(until retry.Until) retry.UntilWithError {
+	return retry.UntilWithError{
+		Condition: func(body []byte) (bool, error) {
+			return until.Condition(body), nil
+		},
+		Timeout: until.Timeout,
+	}
 }
