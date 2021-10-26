@@ -157,16 +157,7 @@ func (api *BaseFeature) ExecuteTheRequest() error {
 }
 
 func (api *BaseFeature) ExecuteTheRequestUntilWithContext(ctx context.Context, until retry.Until) (err error) {
-	if api.Request.Method == http.MethodGet {
-		return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(ctx, nil, wrapUntilError(until))
-	}
-
-	jsonBody, err := json.Marshal(api.Request.Body)
-	if err != nil {
-		return errors.Wrap(err, "json.Marshal failed")
-	}
-
-	return api.ExecuteTheRequestUntilWithPayloadAndContextWithError(ctx, jsonBody, wrapUntilError(until))
+	return api.ExecuteTheRequestUntilWithContextWithError(ctx, wrapUntilError(until))
 }
 
 func (api *BaseFeature) ExecuteTheRequestUntilWithContextWithError(ctx context.Context, until retry.UntilWithError) (err error) {
