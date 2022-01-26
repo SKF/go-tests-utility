@@ -55,7 +55,7 @@ func NewEmailAddress() (_ string, err error) {
 func PollForMessageWithSubject(emailAddress, subject string, fromTimestamp time.Time) (string, error) {
 	time.Sleep(2 * time.Second) //nolint: gomnd
 
-	const timeOut = 5
+	const timeOut = 10
 	for n := 0; n < timeOut; n++ {
 		time.Sleep(time.Second)
 
