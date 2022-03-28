@@ -24,6 +24,10 @@ func RemoveUserRole(identityToken, stage, userID, role string) error {
 	return updateRoleToAllUsersNodes(context.Background(), identityToken, stage, userID, role, removeRole)
 }
 
+func RemoveUserRoleWithContext(ctx context.Context, identityToken, stage, userID, roleToBeRemoved string) (err error) {
+	return updateRoleToAllUsersNodes(ctx, identityToken, stage, userID, role, removeRole)
+}
+
 func updateRoleToAllUsersNodes(ctx context.Context, identityToken, stage string, userID string, role string, roleFunc updateRoleFunc) error {
 	getNodesRequest := client.Get("/users/{id}/nodes-only").
 		Assign("id", userID)
