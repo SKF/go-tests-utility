@@ -33,10 +33,15 @@ func AddUserAccessWithContext(ctx context.Context, identityToken, stage, userID,
 		return fmt.Errorf("Invalid User ID: %q", userID)
 	}
 
+	reqBody := roleRequest{
+		Roles: []string{},
+	}
+
 	req := client.Put("/users/{userId}/nodes/{nodeId}").
 		Assign("userId", userID).
 		Assign("nodeId", nodeID).
-		SetHeader(headers.ContentType, "application/json")
+		SetHeader(headers.ContentType, "application/json").
+		WithJSONPayload(reqBody)
 
 	restClient := httpClientAccessMgmt(stage, identityToken)
 	resp, err := restClient.Do(ctx, req)

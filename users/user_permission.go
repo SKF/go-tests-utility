@@ -47,7 +47,7 @@ func updateRoleToAllUsersNodes(ctx context.Context, identityToken, stage string,
 		return errors.Wrap(err, "failed to decode response")
 	}
 
-	for _, node := range gunhr.Data {
+	for _, node := range gunhr.Data.Nodes {
 
 		req := roleRequest{
 			Roles: roleFunc(node.Roles, role),
@@ -63,7 +63,7 @@ func updateRoleToAllUsersNodes(ctx context.Context, identityToken, stage string,
 			return errors.Wrap(err, "failed to execute request")
 		}
 
-		if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode != http.StatusAccepted {
 			return errors.Errorf("wrong response status: %q", resp.Status)
 		}
 	}
@@ -95,12 +95,13 @@ type roleRequest struct {
 }
 
 type getUserNodesHierarchiesResponse struct {
-	Data []nodeHierarchy `json:"data"`
+	Data nodeHierarchies `json:"data"`
+}
+
+type nodeHierarchies struct {
+	Nodes []nodeHierarchy `json:"nodes"`
 }
 type nodeHierarchy struct {
-	ID      string   `json:"id"`
-	Name    string   `json:"name"`
-	Roles   []string `json:"roles"`
-	SubType string   `json:"subType"`
-	Type    string   `json:"type"`
+	ID    string   `json:"id"`
+	Roles []string `json:"roles"`
 }
