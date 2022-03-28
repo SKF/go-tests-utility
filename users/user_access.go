@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const accessMgmtBaseURL = "https://api-web.%s.users.enlight.skf.com"
+const accessMgmtBaseURL = "https://access-api.%s.users.enlight.skf.com"
 
 func httpClientAccessMgmt(stage, identityToken string) *client.Client {
 	return client.NewClient(
@@ -33,7 +33,7 @@ func AddUserAccessWithContext(ctx context.Context, identityToken, stage, userID,
 		return fmt.Errorf("Invalid User ID: %q", userID)
 	}
 
-	req := client.Put("/users/{userId}/hierarchies/{nodeId}").
+	req := client.Put("/users/{userId}/nodes/{nodeId}").
 		Assign("userId", userID).
 		Assign("nodeId", nodeID).
 		SetHeader(headers.ContentType, "application/json")
@@ -61,7 +61,7 @@ func RemoveUserAccessWithContext(ctx context.Context, identityToken, stage, user
 		return fmt.Errorf("Invalid User ID: %q", userID)
 	}
 
-	req := client.Delete("/users/{userId}/hierarchies/{nodeId}").
+	req := client.Delete("/users/{userId}/nodes/{nodeId}").
 		Assign("userId", userID).
 		Assign("nodeId", nodeID).
 		SetHeader(headers.ContentType, "application/json")
