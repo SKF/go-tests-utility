@@ -38,14 +38,14 @@ func updateRoleToAllUsersNodes(ctx context.Context, identityToken, stage string,
 		return errors.Errorf("wrong response status: %q", resp.Status)
 	}
 
-	gunhr := GetUserNodesHierarchiesResponse{}
+	gunhr := getUserNodesHierarchiesResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(&gunhr); err != nil {
 		return errors.Wrap(err, "failed to decode response")
 	}
 
 	for _, node := range gunhr.Data {
 
-		req := RoleRequest{
+		req := roleRequest{
 			Roles: roleFunc(node.Roles, role),
 		}
 
@@ -86,14 +86,14 @@ func removeRole(roles []string, roleToBeRemoved string) []string {
 	return newUserRoles
 }
 
-type RoleRequest struct {
+type roleRequest struct {
 	Roles []string
 }
 
-type GetUserNodesHierarchiesResponse struct {
-	Data []NodeHierarchy `json:"data"`
+type getUserNodesHierarchiesResponse struct {
+	Data []nodeHierarchy `json:"data"`
 }
-type NodeHierarchy struct {
+type nodeHierarchy struct {
 	ID      string   `json:"id"`
 	Name    string   `json:"name"`
 	Roles   []string `json:"roles"`
