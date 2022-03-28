@@ -100,18 +100,3 @@ type NodeHierarchy struct {
 	SubType string   `json:"subType"`
 	Type    string   `json:"type"`
 }
-type user struct {
-	ID             string   `json:"id"`
-	Email          string   `json:"email"`
-	CompanyID      string   `json:"companyId"`
-	UserRoles      []string `json:"userRoles"`
-	Username       string   `json:"username"`
-	UserStatus     string   `json:"userStatus"`
-	EulaAgreedDate string   `json:"eulaAgreedDate"`
-	ValidEula      bool     `json:"validEula"`
-	Firstname      string   `json:"firstname"`
-	Surname        string   `json:"surname"`
-	Locale         string   `json:"locale"`
-	CreatedDate    string   `json:"createdDate"`
-	UpdatedDate    string   `json:"updatedDate"`
-}
