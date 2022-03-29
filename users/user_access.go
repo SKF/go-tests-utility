@@ -49,7 +49,7 @@ func AddUserAccessWithContext(ctx context.Context, identityToken, stage, userID,
 		return errors.Wrap(err, "failed to execute request")
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusAccepted {
 		return errors.Errorf("wrong response status: %q", resp.Status)
 	}
 
