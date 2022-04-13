@@ -23,18 +23,21 @@ func httpClient(stage, identityToken string) *client.Client {
 	)
 }
 
-func Create(identityToken, stage, parentNodeID, nodetype string) (Component, error) {
-	return CreateWithContext(context.Background(), identityToken, stage, parentNodeID, nodetype)
+func Create(identityToken, stage, parentNodeID, componenttype string) (Component, error) {
+	return CreateWithContext(context.Background(), identityToken, stage, parentNodeID, componenttype, nil)
 }
 
-func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, nodetype string) (Component, error) {
-	requestBody := struct {
-		Type     string `json:"type"`
-		Position int    `json:"position"`
-	}{
-		Type:     nodetype,
-		Position: 1,
+func CreateShaft(identityToken, stage, parentNodeID string, fixedSpeed int) (Component, error) {
+	return CreateWithContext(context.Background(), identityToken, stage, parentNodeID, "shaft", &fixedSpeed)
+}
+
+func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, componenttype string, fixedSpeed *int) (Component, error) {
+	requestBody := Component{
+		Type:       componenttype,
+		Position:   1,
+		FixedSpeed: fixedSpeed,
 	}
+
 	log.WithTracing(ctx).
 		WithField("body", requestBody).
 		WithField("assetID", parentNodeID).
@@ -67,8 +70,15 @@ func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, 
 }
 
 type Component struct {
-	ID         string `json:"id"`
-	Type       string `json:"type"`
-	AttachedTo string `json:"attachedToo"`
-	Position   int    `json:"position"`
+	ID                  string  `json:"id"`
+	Type                string  `json:"type"`
+	AttachedTo          string  `json:"attachedToo"`
+	Position            int     `json:"position"`
+	Designation         *string `json:"designation"`
+	FixedSpeed          *int    `json:"fixedSpeed"`
+	Manufacturer        *string `json:"manufacturer"`
+	PositionDescription *string `json:"positionDescription"`
+	RotatingRing        *string `json:"rotatingRing"`
+	SerialNumber        *string `json:"serialNumber"`
+	ShaftSide           *string `json:"shaftSide"`
 }
