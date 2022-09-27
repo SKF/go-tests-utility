@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,8 +14,8 @@ import (
 	json_matcher "github.com/SKF/go-tests-utility/api/godog/json"
 	"github.com/SKF/go-tests-utility/api/godog/retry"
 
-	http_model "github.com/SKF/go-utility/http-model"
-	"github.com/SKF/go-utility/log"
+	http_model "github.com/SKF/go-utility/v2/http-model"
+	"github.com/SKF/go-utility/v2/log"
 	"github.com/pkg/errors"
 
 	dd_http "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
@@ -246,9 +245,9 @@ func (api *BaseFeature) ExecuteTheRequestWithPayloadAndContext(ctx context.Conte
 
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return errors.Wrap(err, "ioutil.ReadAll failed")
+		return errors.Wrap(err, "io.ReadAll failed")
 	}
 
 	api.Response.Raw = resp
