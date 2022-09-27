@@ -2,7 +2,7 @@ package http
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -39,7 +39,7 @@ func TestSmokePost(t *testing.T) {
 		require.Equal(t, token, req.Header.Get("Authorization"))
 		require.Equal(t, "application/json", req.Header.Get("Content-Type"))
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		req.Body.Close()
 
 		require.Nil(t, err)
@@ -63,7 +63,7 @@ func TestSmokePut(t *testing.T) {
 		require.Equal(t, token, req.Header.Get("Authorization"))
 		require.Equal(t, "application/json", req.Header.Get("Content-Type"))
 
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		req.Body.Close()
 
 		require.Nil(t, err)
