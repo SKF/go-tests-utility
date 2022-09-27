@@ -98,7 +98,7 @@ func getTemporaryPassword(emailMessage string) (string, error) {
 	return subMatches[0][1], nil
 }
 
-var temporaryPasswordRegexp = regexp.MustCompile(`password=(\S+)\"\s+\S+`)
+var temporaryPasswordRegexp = regexp.MustCompile(`\?(?:[^&]+&)*password=([^\s+\"&]+)(?:\"|&)`)
 
 type User struct {
 	ID        string `json:"id"`
