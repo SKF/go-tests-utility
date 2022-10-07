@@ -41,6 +41,22 @@ func KeyIsMissing(json []byte, path string) error {
 	return errors.Errorf("Match error: Expected null got '%s' JSON: %s", result.String(), string(json))
 }
 
+func KeyIsPresent(json []byte, path string) error {
+	if bytes.Equal(bytes.TrimSpace(json), []byte("null")) && (path == "" || path == ".") {
+		return nil
+	}
+
+	path = revertLegacySyntax(path)
+
+	result := gjson.GetBytes(json, path)
+
+	if result.Exists() {
+		return nil
+	}
+
+	return errors.Errorf("Match error: Expected path to be present, missing path: %s", path)
+}
+
 func Match(json []byte, path string, pattern string) error {
 	re, err := regexp.Compile(pattern)
 	if err != nil {
