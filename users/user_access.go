@@ -77,7 +77,7 @@ func RemoveUserAccessWithContext(ctx context.Context, identityToken, stage, user
 		return errors.Wrap(err, "failed to execute request")
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusAccepted {
 		return errors.Errorf("wrong response status: %q", resp.Status)
 	}
 
