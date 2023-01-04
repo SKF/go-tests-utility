@@ -15,7 +15,10 @@ import (
 	disposable_emails "github.com/SKF/go-tests-utility/disposable-emails"
 )
 
-const identityMgmtBaseURL = "https://sso-api.%s.users.enlight.skf.com"
+const (
+	identityMgmtBaseURL = "https://sso-api.%s.users.enlight.skf.com"
+	testUserType        = "test"
+)
 
 func httpClientIdentityMgmt(stage, identityToken string) *client.Client {
 	return client.NewClient(
@@ -36,10 +39,12 @@ func CreateWithContext(ctx context.Context, identityToken, stage, companyID, ema
 		Email     string `json:"email"`
 		GivenName string `json:"givenName"`
 		Surname   string `json:"surname"`
+		Type      string `json:"type"`
 	}{
 		Email:     email,
 		GivenName: "Foo",
 		Surname:   "Bar",
+		Type:      testUserType,
 	}
 
 	req := client.Post("/companies/{companyId}/users").
@@ -108,4 +113,5 @@ type User struct {
 	Surname   string `json:"surname"`
 	Language  string `json:"language"`
 	Status    string `json:"status"`
+	Type      string `json:"type"`
 }
