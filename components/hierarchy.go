@@ -72,7 +72,7 @@ func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, 
 type Component struct {
 	ID                  string  `json:"id"`
 	Type                string  `json:"type"`
-	AttachedTo          string  `json:"attachedToo"`
+	AttachedTo          string  `json:"attachedTo"`
 	Position            int     `json:"position"`
 	Designation         *string `json:"designation"`
 	FixedSpeed          *int    `json:"fixedSpeed"`
