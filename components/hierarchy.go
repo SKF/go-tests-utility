@@ -24,27 +24,37 @@ func httpClient(stage, identityToken string) *client.Client {
 }
 
 func Create(identityToken, stage, parentNodeID, componenttype string) (Component, error) {
-	return CreateWithContext(context.Background(), identityToken, stage, parentNodeID, componenttype, nil)
+	return CreateComponentWithContext(context.Background(), identityToken, stage, parentNodeID, Component{
+		Type: componenttype,
+	})
 }
 
 func CreateShaft(identityToken, stage, parentNodeID string, fixedSpeed int) (Component, error) {
-	return CreateWithContext(context.Background(), identityToken, stage, parentNodeID, "shaft", &fixedSpeed)
+	return CreateComponentWithContext(context.Background(), identityToken, stage, parentNodeID, Component{
+		Type:       "shaft",
+		FixedSpeed: &fixedSpeed,
+	})
 }
 
+// Deprecated: Please use CreateComponentWithContext instead
 func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, componenttype string, fixedSpeed *int) (Component, error) {
-	requestBody := Component{
+	component := Component{
 		Type:       componenttype,
 		Position:   1,
 		FixedSpeed: fixedSpeed,
 	}
 
+	return CreateComponentWithContext(ctx, identityToken, stage, parentNodeID, component)
+}
+
+func CreateComponentWithContext(ctx context.Context, identityToken, stage, parentNodeID string, component Component) (Component, error) {
 	log.WithTracing(ctx).
-		WithField("body", requestBody).
+		WithField("body", component).
 		WithField("assetID", parentNodeID).
 		Debugf("creating component")
 
 	req := client.Post(fmt.Sprintf("/assets/%s/components", parentNodeID)).
-		WithJSONPayload(requestBody)
+		WithJSONPayload(component)
 
 	restClient := httpClient(stage, identityToken)
 	resp, err := restClient.Do(ctx, req)
