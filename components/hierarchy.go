@@ -48,6 +48,10 @@ func CreateWithContext(ctx context.Context, identityToken, stage, parentNodeID, 
 }
 
 func CreateComponentWithContext(ctx context.Context, identityToken, stage, parentNodeID string, component Component) (Component, error) {
+	if component.Position == 0 {
+		component.Position = 1
+	}
+
 	log.WithTracing(ctx).
 		WithField("body", component).
 		WithField("assetID", parentNodeID).
