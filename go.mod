@@ -6,11 +6,11 @@ require (
 	github.com/SKF/go-rest-utility v0.13.1
 	github.com/SKF/go-utility/v2 v2.33.5
 	github.com/cucumber/godog v0.12.6
-	github.com/cucumber/messages-go/v10 v10.0.3
+	github.com/cucumber/messages-go/v16 v16.0.1
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.2
-	github.com/tidwall/gjson v1.14.0
+	github.com/tidwall/gjson v1.14.4
 	gopkg.in/DataDog/dd-trace-go.v1 v1.50.0
 )
 
@@ -32,11 +32,9 @@ require (
 	github.com/aws/smithy-go v1.13.5 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cucumber/gherkin-go/v19 v19.0.3 // indirect
-	github.com/cucumber/messages-go/v16 v16.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
