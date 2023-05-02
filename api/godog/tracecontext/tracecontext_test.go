@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/messages-go/v10"
+	"github.com/cucumber/messages-go/v16"
 	"github.com/stretchr/testify/assert"
 	dd_tracer "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 
@@ -65,7 +65,7 @@ func Test_TraceContextHappyCase(t *testing.T) {
 	s := &godog.Scenario{
 		Id:   "1",
 		Name: "Scenario",
-		Steps: []*messages.Pickle_PickleStep{
+		Steps: []*messages.PickleStep{
 			{
 				Id:   "1",
 				Text: "Step 1",
@@ -79,7 +79,7 @@ func Test_TraceContextHappyCase(t *testing.T) {
 				Text: "Step 3",
 			},
 		},
-		Tags: []*messages.Pickle_PickleTag{
+		Tags: []*messages.PickleTag{
 			{
 				Name: "ScenarioTag",
 			},
