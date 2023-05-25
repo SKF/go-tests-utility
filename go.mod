@@ -4,27 +4,27 @@ go 1.19
 
 require (
 	github.com/SKF/go-rest-utility v0.13.1
-	github.com/SKF/go-utility/v2 v2.33.6
+	github.com/SKF/go-utility/v2 v2.33.7
 	github.com/cucumber/godog v0.12.6
 	github.com/cucumber/messages-go/v16 v16.0.1
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.3
 	github.com/tidwall/gjson v1.14.4
-	gopkg.in/DataDog/dd-trace-go.v1 v1.50.1
+	gopkg.in/DataDog/dd-trace-go.v1 v1.51.0
 )
 
 require (
 	github.com/DataDog/appsec-internal-go v1.0.0 // indirect
-	github.com/DataDog/datadog-agent/pkg/obfuscate v0.43.1 // indirect
+	github.com/DataDog/datadog-agent/pkg/obfuscate v0.45.0-rc.1 // indirect
 	github.com/DataDog/datadog-agent/pkg/remoteconfig/state v0.45.0-rc.1 // indirect
 	github.com/DataDog/datadog-go/v5 v5.1.1 // indirect
-	github.com/DataDog/go-libddwaf v1.1.0 // indirect
+	github.com/DataDog/go-libddwaf v1.2.0 // indirect
 	github.com/DataDog/go-tuf v0.3.0--fix-localmeta-fork // indirect
 	github.com/DataDog/sketches-go v1.4.1 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/SKF/go-enlight-middleware v0.8.2 // indirect
-	github.com/aws/aws-sdk-go v1.44.259 // indirect
+	github.com/aws/aws-sdk-go v1.44.269 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.18.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.33 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.27 // indirect
