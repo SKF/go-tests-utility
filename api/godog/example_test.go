@@ -1,7 +1,9 @@
 package godog
 
 import (
+	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,8 +13,24 @@ import (
 )
 
 func TestGetRequest(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, http.MethodGet, r.Method)
+		require.Equal(t, "/todos/1", r.URL.Path)
+
+		body := `
+{
+	"userId": 1,
+	"id": 1,
+	"title": "delectus aut autem",
+	"completed": false
+}`
+
+		fmt.Fprintln(w, body)
+	}))
+	defer s.Close()
+
 	api := BaseFeature{}
-	api.SetBaseUrl("https://jsonplaceholder.typicode.com")
+	api.SetBaseUrl(s.URL)
 
 	err := api.CreatePathRequest(http.MethodGet, "/todos/{id}")
 	require.NoError(t, err)
@@ -33,8 +51,16 @@ func TestGetRequest(t *testing.T) {
 }
 
 func TestCreateInvalidRequest(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, http.MethodPost, r.Method)
+		require.Equal(t, "/posts", r.URL.Path)
+
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer s.Close()
+
 	api := BaseFeature{}
-	api.SetBaseUrl("https://jsonplaceholder.typicode.com")
+	api.SetBaseUrl(s.URL)
 
 	err := api.CreatePathRequest(http.MethodPost, "/posts")
 	require.NoError(t, err)
