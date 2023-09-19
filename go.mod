@@ -6,7 +6,7 @@ require (
 	github.com/SKF/go-rest-utility v0.13.4
 	github.com/SKF/go-utility/v2 v2.33.12
 	github.com/cucumber/godog v0.13.0
-	github.com/cucumber/messages-go/v16 v16.0.1
+	github.com/cucumber/messages/go/v21 v21.0.1
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.4
@@ -32,7 +32,6 @@ require (
 	github.com/aws/smithy-go v1.14.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cucumber/gherkin/go/v26 v26.2.0 // indirect
-	github.com/cucumber/messages/go/v21 v21.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.5.0-alpha.1 // indirect
