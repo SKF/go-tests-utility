@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/SKF/go-rest-utility v0.13.2
-	github.com/SKF/go-utility/v2 v2.33.11
+	github.com/SKF/go-utility/v2 v2.33.12
 	github.com/cucumber/godog v0.12.6
 	github.com/cucumber/messages-go/v16 v16.0.1
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
@@ -23,8 +23,8 @@ require (
 	github.com/DataDog/go-tuf v1.0.1-0.5.2 // indirect
 	github.com/DataDog/sketches-go v1.4.1 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
-	github.com/SKF/go-enlight-middleware v0.8.4 // indirect
-	github.com/aws/aws-sdk-go v1.44.330 // indirect
+	github.com/SKF/go-enlight-middleware v0.8.5 // indirect
+	github.com/aws/aws-sdk-go v1.45.11 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.21.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.41 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.35 // indirect
@@ -38,7 +38,7 @@ require (
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.3.1 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-memdb v1.3.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
