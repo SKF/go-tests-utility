@@ -3,7 +3,7 @@ module github.com/SKF/go-tests-utility
 go 1.19
 
 require (
-	github.com/SKF/go-rest-utility v0.13.4
+	github.com/SKF/go-rest-utility v0.13.5
 	github.com/SKF/go-utility/v2 v2.33.12
 	github.com/cucumber/godog v0.13.0
 	github.com/cucumber/messages/go/v21 v21.0.1
@@ -24,7 +24,7 @@ require (
 	github.com/DataDog/sketches-go v1.4.2 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/SKF/go-enlight-middleware v0.8.5 // indirect
-	github.com/aws/aws-sdk-go v1.45.11 // indirect
+	github.com/aws/aws-sdk-go v1.45.12 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.21.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.41 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.35 // indirect

@@ -22,12 +22,12 @@ github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migc
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
 github.com/SKF/go-enlight-middleware v0.8.5 h1:+23yE50gKVNrodQVoWbNcvV5zYWgfHAIFF1rUhjEK6Y=
 github.com/SKF/go-enlight-middleware v0.8.5/go.mod h1:OygaLyG8KsPuDMq3Tfu10S5Yd0chZGshdcpWwB5pBZU=
-github.com/SKF/go-rest-utility v0.13.4 h1:KIoB+M+LwHFeOBjk/3LTkG4YDCyhRov405pkb7c/COE=
-github.com/SKF/go-rest-utility v0.13.4/go.mod h1:v7nZpEcbP6tecK8PI1RDzbdNbivNnLtBAy2PPH1eXFo=
+github.com/SKF/go-rest-utility v0.13.5 h1:+UAcL+MmAPGrBTD4mbvfIMS3smN+AnSNF0JkcsYSCYA=
+github.com/SKF/go-rest-utility v0.13.5/go.mod h1:iBMCCLb/BomIFm4uXyxsdApQZNgEABo9puCJ/zBbK08=
 github.com/SKF/go-utility/v2 v2.33.12 h1:uuTj+p5VaRHxP+Q0ZO6a2XpLnBisoOCZixwNtpJRxcw=
 github.com/SKF/go-utility/v2 v2.33.12/go.mod h1:07lnd+OTNYPd0wGj0J1NQaJkjeSX6xBu4JLkR1SCF+g=
-github.com/aws/aws-sdk-go v1.45.11 h1:8qiSrA12+NRr+2MVpMApi3JxtiFFjDVU1NeWe+80bYg=
-github.com/aws/aws-sdk-go v1.45.11/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
+github.com/aws/aws-sdk-go v1.45.12 h1:+bKbbesGNPp+TeGrcqfrWuZoqcIEhjwKyBMHQPp80Jo=
+github.com/aws/aws-sdk-go v1.45.12/go.mod h1:aVsgQcEevwlmQ7qHE9I3h+dtQgpqhFB+i8Phjh7fkwI=
 github.com/aws/aws-sdk-go-v2 v1.21.0 h1:gMT0IW+03wtYJhRqTVYn0wLzwdnK9sRMcxmtfGzRdJc=
 github.com/aws/aws-sdk-go-v2 v1.21.0/go.mod h1:/RfNgGmRxI+iFOB1OeJUyxiU+9s88k3pfHvDagGEp0M=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.41 h1:22dGT7PneFMx4+b3pz7lMTRyN8ZKH7M2cW4GP9yUS2g=
