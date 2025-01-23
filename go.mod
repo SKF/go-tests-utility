@@ -1,8 +1,7 @@
 module github.com/SKF/go-tests-utility
 
-go 1.21
+go 1.23
 
-toolchain go1.23.0
 
 require (
 	github.com/SKF/go-rest-utility v0.15.1-0.20250123134648-1fc7bc2a0932
