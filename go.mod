@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/SKF/go-rest-utility v0.16.1
 	github.com/SKF/go-utility/v2 v2.34.0
-	github.com/cucumber/godog v0.13.0
+	github.com/cucumber/godog v0.15.0
 	github.com/cucumber/messages/go/v21 v21.0.1
 	github.com/go-http-utils/headers v0.0.0-20181008091004-fed159eddc2a
 	github.com/pkg/errors v0.9.1
