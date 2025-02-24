@@ -11,7 +11,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
-	gopkg.in/DataDog/dd-trace-go.v1 v1.71.0
+	gopkg.in/DataDog/dd-trace-go.v1 v1.72.1
 )
 
 require (
